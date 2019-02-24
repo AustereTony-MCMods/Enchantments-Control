@@ -8,12 +8,14 @@ import austeretony.enchcontrol.common.config.ConfigLoader;
 import austeretony.enchcontrol.common.config.EnumConfigSettings;
 import austeretony.enchcontrol.common.config.EnumEnchantmentListType;
 import austeretony.enchcontrol.common.enchantments.EnchantmentWrapper;
+import austeretony.enchcontrol.common.main.ECMain;
 import austeretony.enchcontrol.common.main.EnumChatMessages;
 import austeretony.enchcontrol.common.reference.CommonReference;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.MinecraftServer;
@@ -76,7 +78,7 @@ public class CommandEC extends CommandBase {
             if (!this.validAction(player, true, true, false, true)) break;
             EnchantmentWrapper.clearData();
             ConfigLoader.load();
-            ConfigLoader.applySettings();
+            this.wrap();
             EnumChatMessages.COMMAND_EC_RELOAD.sendMessage(player);
             break;
         case BACKUP:
@@ -115,6 +117,12 @@ public class CommandEC extends CommandBase {
             return false;
         }
         return true;
+    }
+
+    private void wrap() {
+        ECMain.LOGGER.info("Applying enchantments settings...");
+        for (Enchantment enchantment : Enchantment.REGISTRY)
+            EnchantmentWrapper.get(enchantment);//getter will wrap enchantment and apply settings
     }
 
     private void calculate(EntityPlayer player, String eval) {

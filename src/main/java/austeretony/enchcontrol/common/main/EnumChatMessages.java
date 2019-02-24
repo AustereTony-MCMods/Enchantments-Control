@@ -92,7 +92,7 @@ public enum EnumChatMessages {
             CommonReference.sendMessage(player, prefix().appendSibling(new TextComponentTranslation("ec.command.list-all")));
             Set<String> sortedModNames = new TreeSet<String>();
             Multimap<String, EnchantmentWrapper> wrappersByModNames = HashMultimap.<String, EnchantmentWrapper>create();
-            for (EnchantmentWrapper wrapper: EnchantmentWrapper.WRAPPERS.values()) {
+            for (EnchantmentWrapper wrapper: EnchantmentWrapper.getWrappers()) {
                 modName = ECMain.MODS_NAMES.get(wrapper.modid);
                 modName = modName == null ? "Undefined" : modName;
                 sortedModNames.add(modName);
@@ -171,9 +171,9 @@ public enum EnumChatMessages {
             break;
         case COMMAND_EC_INFO:
             ResourceLocation registryName = new ResourceLocation(args[0]);
-            if (EnchantmentWrapper.WRAPPERS.containsKey(registryName)) {
-                EnchantmentWrapper wrapper = EnchantmentWrapper.WRAPPERS.get(registryName);
-                Enchantment ench = wrapper.getEnchantment();
+            Enchantment ench = Enchantment.REGISTRY.getObject(registryName);
+            if (ench != null) {
+                EnchantmentWrapper wrapper = EnchantmentWrapper.get(ench);
                 //Name, registry name
                 msg1 = new TextComponentTranslation(wrapper.getName());
                 msg1.getStyle().setColor(TextFormatting.WHITE);
@@ -232,7 +232,7 @@ public enum EnumChatMessages {
                 //Type
                 msg1 = new TextComponentTranslation("ec.command.info.type");
                 msg1.getStyle().setColor(TextFormatting.AQUA);
-                msg2 = new TextComponentString(" " + ench.type.toString());
+                msg2 = new TextComponentString(" " + ench.type == null ? "NONE" : ench.type.toString());
                 msg2.getStyle().setColor(TextFormatting.WHITE);
                 CommonReference.sendMessage(player, msg1.appendSibling(msg2));
                 //Slots

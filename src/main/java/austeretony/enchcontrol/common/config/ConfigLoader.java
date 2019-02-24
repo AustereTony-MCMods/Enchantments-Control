@@ -161,7 +161,7 @@ public class ConfigLoader {
         EnchantmentWrapper wrapper;
         String rarityStr, typeStr;
         Enchantment.Rarity rarity;
-        EnumEnchantmentType type;
+        EnumEnchantmentType type = null;
         EntityEquipmentSlot[] equipmentSlots;
         for (JsonElement enchElement : settingsFile) {
             enchObject = enchElement.getAsJsonObject();
@@ -173,11 +173,13 @@ public class ConfigLoader {
                 rarity = Enchantment.Rarity.COMMON;
             }
             typeStr = enchObject.get(EnumEnchantmentsKeys.TYPE.key).getAsString();
-            try {
-                type = EnumEnchantmentType.valueOf(typeStr);
-            } catch(IllegalArgumentException exception) {
-                ECMain.LOGGER.error("Unknown enchantment type: <{}>! Default type <ALL> will be used.", typeStr);
-                type = EnumEnchantmentType.ALL;
+            if (!typeStr.equals("NONE")) {
+                try {
+                    type = EnumEnchantmentType.valueOf(typeStr);
+                } catch(IllegalArgumentException exception) {
+                    ECMain.LOGGER.error("Unknown enchantment type: <{}>! Default type <ALL> will be used.", typeStr);
+                    type = EnumEnchantmentType.ALL;
+                }
             }
             wrapper = EnchantmentWrapper.create(
                     new ResourceLocation(enchObject.get(EnumEnchantmentsKeys.ID.key).getAsString()), 
@@ -186,8 +188,8 @@ public class ConfigLoader {
                     rarity == null ? Enchantment.Rarity.COMMON : rarity,
                             enchObject.get(EnumEnchantmentsKeys.MIN_LEVEL.key).getAsInt(),
                             enchObject.get(EnumEnchantmentsKeys.MAX_LEVEL.key).getAsInt(),
-                            type == null ? EnumEnchantmentType.ALL : type,
-                                    getSlots(enchObject.get(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key).getAsJsonArray()));
+                            type,
+                            getSlots(enchObject.get(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key).getAsJsonArray()));
             wrapper.setCustomEvals(enchObject.get(EnumEnchantmentsKeys.CUSTOM_EVALUATIONS.key).getAsBoolean());
             wrapper.setMinEnchantabilityEvaluation(enchObject.get(EnumEnchantmentsKeys.MIN_ENCH_EVAL.key).getAsString());
             wrapper.setMaxEnchantabilityEvaluation(enchObject.get(EnumEnchantmentsKeys.MAX_ENCH_EVAL.key).getAsString());
@@ -291,7 +293,7 @@ public class ConfigLoader {
         enchsArray = new JsonArray(),
         equipArray, incompatArray, itemsArray;
         JsonObject enchObject;
-        for (EnchantmentWrapper wrapper : EnchantmentWrapper.WRAPPERS.values()) {
+        for (EnchantmentWrapper wrapper : EnchantmentWrapper.getWrappers()) {
             enchObject = new JsonObject();
             equipArray = new JsonArray();
             incompatArray = new JsonArray();
@@ -305,7 +307,7 @@ public class ConfigLoader {
             enchObject.add(EnumEnchantmentsKeys.CUSTOM_EVALUATIONS.key, new JsonPrimitive(false));
             enchObject.add(EnumEnchantmentsKeys.MIN_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMinEnchantabilityEval()));
             enchObject.add(EnumEnchantmentsKeys.MAX_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMaxEnchantabilityEval()));
-            enchObject.add(EnumEnchantmentsKeys.TYPE.key, new JsonPrimitive(wrapper.getType().toString()));
+            enchObject.add(EnumEnchantmentsKeys.TYPE.key, new JsonPrimitive(wrapper.getType() == null ? "NONE" : wrapper.getType().toString()));
             for (EntityEquipmentSlot equipment : wrapper.getEquipmentSlots())
                 equipArray.add(new JsonPrimitive(equipment.toString()));
             enchObject.add(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key, equipArray);
@@ -335,7 +337,7 @@ public class ConfigLoader {
             file = LIST_ALL_FILE;
             Set<String> sortedModNames = new TreeSet<String>();
             Multimap<String, EnchantmentWrapper> wrappersByModNames = HashMultimap.<String, EnchantmentWrapper>create();
-            for (EnchantmentWrapper wrapper: EnchantmentWrapper.WRAPPERS.values()) {
+            for (EnchantmentWrapper wrapper: EnchantmentWrapper.getWrappers()) {
                 modName = ECMain.MODS_NAMES.get(wrapper.modid);
                 modName = modName == null ? "Undefined" : modName;
                 sortedModNames.add(modName);
@@ -379,38 +381,6 @@ public class ConfigLoader {
                 writer.println(line);
         } catch (IOException exception) {
             exception.printStackTrace();
-        }
-    }
-
-    public static void applySettings() {
-        ECMain.LOGGER.info("Applying enchantments settings...");
-        EnchantmentWrapper wrapper;
-        for (Enchantment enchantment : Enchantment.REGISTRY) {
-            wrapper = EnchantmentWrapper.get(enchantment);
-            if (wrapper != null) {
-                wrapper.setEnchantment(enchantment);
-                if (!wrapper.isEnabled())
-                    ECMain.LOGGER.info("Enchantment <{}> disabled! It can't be obtained in survival mode.", enchantment.getRegistryName());
-                enchantment.rarity = wrapper.getRarity();
-                enchantment.type = wrapper.getType();
-                enchantment.applicableEquipmentTypes = wrapper.getEquipmentSlots();
-                ECMain.LOGGER.info("Initialized enchantment <{}> with config settings.", enchantment.getRegistryName());
-            } else {
-                wrapper = EnchantmentWrapper.create(
-                        enchantment.getRegistryName(), 
-                        true, 
-                        enchantment.getName(),
-                        enchantment.rarity, 
-                        enchantment.getMinLevel(),
-                        enchantment.getMaxLevel(),
-                        enchantment.type, 
-                        enchantment.applicableEquipmentTypes);
-                wrapper.setEnchantment(enchantment);
-                wrapper.setMinEnchantabilityEvaluation(MIN_ENCH_DEFAULT_EVAL);
-                wrapper.setMaxEnchantabilityEvaluation(MAX_ENCH_DEFAULT_EVAL);
-                EnchantmentWrapper.UNKNOWN.add(wrapper);
-                ECMain.LOGGER.info("Unknown enchantment <{}>. Data collected.", enchantment.getRegistryName());
-            }
         }
     }
 }

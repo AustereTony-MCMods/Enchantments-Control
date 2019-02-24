@@ -31,7 +31,7 @@ public class ECMain {
     public static final String 
     MODID = "enchcontrol", 
     NAME = "Enchantments Control", 
-    VERSION = "1.0.0", 
+    VERSION = "1.0.1", 
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_forge.json",
@@ -55,13 +55,8 @@ public class ECMain {
 
     @EventHandler
     public void serverStarting(FMLServerStartingEvent event) {  
-        //TODO Settings apply. Still not sure there is the best place to call it...
-        //Settings must be applied after vanilla enchantment registration and forge enchantment registry event firing, but before first call on any enchantment object
-        if (event.getSide() == Side.SERVER)//Only fires at DEDICATED server
-            if (!ConfigLoader.settingsApplied) {
-                ConfigLoader.settingsApplied = ConfigLoader.runningAtDedicatedServer = true;
-                ConfigLoader.applySettings();
-            }
+        if (event.getSide() == Side.SERVER)
+            ConfigLoader.runningAtDedicatedServer = true;
         CommonReference.registerCommand(event, new CommandEC());
         if (EnumConfigSettings.CHECK_UPDATES.isEnabled())
             new Thread(new UpdateChecker(), "Enchantments Control Update Check").start();  
@@ -75,7 +70,7 @@ public class ECMain {
     }
 
     private void removeUnloadedModdedEnchantments() {
-        Iterator<EnchantmentWrapper> iterator = EnchantmentWrapper.WRAPPERS.values().iterator();
+        Iterator<EnchantmentWrapper> iterator = EnchantmentWrapper.getWrappers().iterator();
         EnchantmentWrapper wrapper;
         while (iterator.hasNext()) {
             wrapper = iterator.next();

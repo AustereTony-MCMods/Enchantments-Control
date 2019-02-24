@@ -1,6 +1,7 @@
 package austeretony.enchcontrol.common.enchantments;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Set;
 import com.udojava.evalex.Expression;
 
 import austeretony.enchcontrol.common.config.ConfigLoader;
+import austeretony.enchcontrol.common.main.ECMain;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -17,7 +19,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class EnchantmentWrapper {
 
-    public static final Map<ResourceLocation, EnchantmentWrapper> WRAPPERS = new HashMap<ResourceLocation, EnchantmentWrapper>();
+    private static final Map<ResourceLocation, EnchantmentWrapper> WRAPPERS = new HashMap<ResourceLocation, EnchantmentWrapper>();
 
     public static final Set<EnchantmentWrapper> UNKNOWN = new HashSet<EnchantmentWrapper>();
 
@@ -25,7 +27,7 @@ public class EnchantmentWrapper {
 
     public final String modid;
 
-    private boolean enabled, customEvals;
+    private boolean enabled, initialized, customEvals;
 
     private String name, minEnchEval, maxEnchEval;
 
@@ -63,21 +65,57 @@ public class EnchantmentWrapper {
         wrapper.setMaxLevel(maxLevel);
         wrapper.setType(type);
         wrapper.setEquipmentSlots(slots);
-        wrapper.enchantability = new int[maxLevel - minLevel + 1][2];
         return wrapper;
     }
 
-    public static EnchantmentWrapper get(ResourceLocation registryName) {
-        return WRAPPERS.get(registryName);
+    public static Collection<EnchantmentWrapper> getWrappers() {
+        return WRAPPERS.values();
     }
 
-    public static EnchantmentWrapper get(Enchantment enchantment) {
-        return get(enchantment.getRegistryName());
+    public static EnchantmentWrapper get(Enchantment enchantment) {   
+        //TODO Hot fix for issue #1
+        //Enchantment now will be wrapped on first getter call
+        ResourceLocation registryName = enchantment.getRegistryName();
+        EnchantmentWrapper wrapper;
+        if (!WRAPPERS.containsKey(registryName)) {
+            wrapper = EnchantmentWrapper.create(
+                    registryName, 
+                    true, 
+                    enchantment.getName(),
+                    enchantment.rarity, 
+                    enchantment.getMinLevel(),
+                    enchantment.getMaxLevel(),
+                    enchantment.type, 
+                    enchantment.applicableEquipmentTypes);
+            wrapper.initialized = true;
+            wrapper.setEnchantment(enchantment);
+            wrapper.setMinEnchantabilityEvaluation(ConfigLoader.MIN_ENCH_DEFAULT_EVAL);
+            wrapper.setMaxEnchantabilityEvaluation(ConfigLoader.MAX_ENCH_DEFAULT_EVAL);
+            EnchantmentWrapper.UNKNOWN.add(wrapper);
+            ECMain.LOGGER.info("Unknown enchantment <{}>. Data collected.", registryName);
+        } else {
+            wrapper = WRAPPERS.get(registryName);
+            if (!wrapper.initialized) {
+                wrapper.initialized = true;
+                wrapper.setEnchantment(enchantment);
+                if (!wrapper.isEnabled())
+                    ECMain.LOGGER.info("Enchantment <{}> disabled! It can't be obtained in survival mode.", registryName);
+                enchantment.rarity = wrapper.getRarity();
+                enchantment.type = wrapper.getType();
+                enchantment.applicableEquipmentTypes = wrapper.getEquipmentSlots();
+                ECMain.LOGGER.info("Initialized enchantment <{}> with config settings.", registryName);
+            }
+        }
+        return wrapper;
     }
 
     public static void clearData() {
         WRAPPERS.clear();
         UNKNOWN.clear();
+    }
+
+    public void initialize() {
+        this.initialized = true;
     }
 
     public Enchantment getEnchantment() {
@@ -110,6 +148,8 @@ public class EnchantmentWrapper {
 
     public void setCustomEvals(boolean flag) {
         this.customEvals = flag;
+        if (flag)
+            this.enchantability = new int[maxLevel - minLevel + 1][2];
     }
 
     public int getMinEnchantability(int enchantmentLevel) {

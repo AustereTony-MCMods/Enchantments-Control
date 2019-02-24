@@ -166,12 +166,6 @@ public class ECHooks {
 
     //Hook to <ItemEnchantedBook> class to <getSubItems()> method (replaces whole method).
     public static void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
-        //TODO Settings apply. Still not sure there is the best place to call it...
-        //Settings must be applied after vanilla enchantment registration and forge enchantment registry event firing, but before first call on any enchantment object
-        if (!ConfigLoader.settingsApplied) {//Fires on client and INTEGRATED server
-            ConfigLoader.settingsApplied = true;
-            ConfigLoader.applySettings();
-        }
         if (tab == CreativeTabs.SEARCH) {
             for (Enchantment enchantment : Enchantment.REGISTRY)
                 if (enchantment.type != null)
