@@ -1,0 +1,10 @@
+{
+  "homepage": "https://minecraft.curseforge.com/projects/enchantments-control",
+  "1.12.2": {
+    "1.0.0": "All information available on the homepage." 
+  },
+  "promos": {
+    "1.12.2-latest": "1.0.0",
+    "1.12.2-recommended": "1.0.0"
+  }
+}
