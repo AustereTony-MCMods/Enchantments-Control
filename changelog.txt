@@ -1,3 +1,7 @@
+1.0.1b
++Fixed enchantments wrapper behavior, it will wrap enchantment on first call now.
++Code cleanup.
+
 1.0.0b
 +Initial release.
 
