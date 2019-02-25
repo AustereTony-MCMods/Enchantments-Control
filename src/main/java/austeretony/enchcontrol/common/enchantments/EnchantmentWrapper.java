@@ -16,6 +16,7 @@ import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 
 public class EnchantmentWrapper {
 
@@ -27,7 +28,7 @@ public class EnchantmentWrapper {
 
     public final String modid;
 
-    private boolean enabled, initialized, customEvals;
+    private boolean enabled, initialized, customEvals, isTreasure, doublePrice, isCurse, isAllowedOnBooks, hasIncompat, hasItemsList, hasDesc;
 
     private String name, minEnchEval, maxEnchEval;
 
@@ -44,9 +45,9 @@ public class EnchantmentWrapper {
 
     private EntityEquipmentSlot[] equipmentSlots;
 
-    private Set<ResourceLocation> 
-    incompatibleEnchants = new HashSet<ResourceLocation>(),
-    itemsList = new HashSet<ResourceLocation>();
+    private Set<ResourceLocation> incompatibleEnchants, itemsList;
+
+    private String[] description;
 
     private Enchantment wrapped;
 
@@ -73,8 +74,6 @@ public class EnchantmentWrapper {
     }
 
     public static EnchantmentWrapper get(Enchantment enchantment) {   
-        //TODO Hot fix for issue #1
-        //Enchantment now will be wrapped on first getter call
         ResourceLocation registryName = enchantment.getRegistryName();
         EnchantmentWrapper wrapper;
         if (!WRAPPERS.containsKey(registryName)) {
@@ -88,21 +87,27 @@ public class EnchantmentWrapper {
                     enchantment.type, 
                     enchantment.applicableEquipmentTypes);
             wrapper.initialized = true;
-            wrapper.setEnchantment(enchantment);
             wrapper.setMinEnchantabilityEvaluation(ConfigLoader.MIN_ENCH_DEFAULT_EVAL);
             wrapper.setMaxEnchantabilityEvaluation(ConfigLoader.MAX_ENCH_DEFAULT_EVAL);
-            EnchantmentWrapper.UNKNOWN.add(wrapper);
+            wrapper.setTreasure(enchantment.isTreasureEnchantment());
+            wrapper.setDoublePrice(enchantment.isTreasureEnchantment());
+            wrapper.setCurse(enchantment.isCurse());
+            wrapper.setAllowedOnBooks(enchantment.isAllowedOnBooks());
+            wrapper.setEnchantment(enchantment);
+            wrapper.calculateEnchantability();
+            UNKNOWN.add(wrapper);
             ECMain.LOGGER.info("Unknown enchantment <{}>. Data collected.", registryName);
         } else {
             wrapper = WRAPPERS.get(registryName);
             if (!wrapper.initialized) {
                 wrapper.initialized = true;
-                wrapper.setEnchantment(enchantment);
                 if (!wrapper.isEnabled())
                     ECMain.LOGGER.info("Enchantment <{}> disabled! It can't be obtained in survival mode.", registryName);
                 enchantment.rarity = wrapper.getRarity();
                 enchantment.type = wrapper.getType();
                 enchantment.applicableEquipmentTypes = wrapper.getEquipmentSlots();
+                wrapper.setEnchantment(enchantment);
+                wrapper.calculateEnchantability();
                 ECMain.LOGGER.info("Initialized enchantment <{}> with config settings.", registryName);
             }
         }
@@ -112,10 +117,6 @@ public class EnchantmentWrapper {
     public static void clearData() {
         WRAPPERS.clear();
         UNKNOWN.clear();
-    }
-
-    public void initialize() {
-        this.initialized = true;
     }
 
     public Enchantment getEnchantment() {
@@ -142,18 +143,29 @@ public class EnchantmentWrapper {
         this.name = name;
     }
 
+    public void calculateEnchantability() {
+        this.enchantability = new int[this.maxLevel - this.minLevel + 1][2];
+        if (this.customEvals) {
+            this.calcMinEnchantabilityCustom(this.minEnchEval);
+            this.calcMaxEnchantabilityCustom(this.maxEnchEval);
+        } else {
+            for (int i = this.minLevel; i <= this.maxLevel; i++) {
+                this.enchantability[i - this.minLevel][0] = this.wrapped.getMinEnchantability(i);
+                this.enchantability[i - this.minLevel][1] = this.wrapped.getMaxEnchantability(i);
+            }
+        }
+    }
+
     public boolean useCustomEvals() {
         return this.customEvals;
     }
 
     public void setCustomEvals(boolean flag) {
         this.customEvals = flag;
-        if (flag)
-            this.enchantability = new int[maxLevel - minLevel + 1][2];
     }
 
     public int getMinEnchantability(int enchantmentLevel) {
-        return this.customEvals ? this.enchantability[enchantmentLevel - this.minLevel][0] : this.wrapped.getMinEnchantability(enchantmentLevel);
+        return this.enchantability[enchantmentLevel - this.minLevel][0];
     }
 
     public String getMinEnchantabilityEval() {
@@ -162,11 +174,9 @@ public class EnchantmentWrapper {
 
     public void setMinEnchantabilityEvaluation(String eval) {
         this.minEnchEval = eval;
-        if (this.customEvals)
-            this.calcMinEnchantability(eval);
     }
 
-    private void calcMinEnchantability(String eval) {
+    private void calcMinEnchantabilityCustom(String eval) {
         if (eval.isEmpty())             
             eval = ConfigLoader.MIN_ENCH_DEFAULT_EVAL;
         BigDecimal currLvl, result;
@@ -178,7 +188,7 @@ public class EnchantmentWrapper {
     }
 
     public int getMaxEnchantability(int enchantmentLevel) {
-        return this.customEvals ? this.enchantability[enchantmentLevel - this.minLevel][1] : this.wrapped.getMaxEnchantability(enchantmentLevel);
+        return this.enchantability[enchantmentLevel - this.minLevel][1];
     }
 
     public String getMaxEnchantabilityEval() {
@@ -187,11 +197,9 @@ public class EnchantmentWrapper {
 
     public void setMaxEnchantabilityEvaluation(String eval) {
         this.maxEnchEval = eval;
-        if (this.customEvals)
-            this.calcMaxEnchantability(eval);
     }
 
-    private void calcMaxEnchantability(String eval) {
+    private void calcMaxEnchantabilityCustom(String eval) {
         if (eval.isEmpty()) 
             eval = ConfigLoader.MAX_ENCH_DEFAULT_EVAL;
         BigDecimal minEnch, currLvl, result;
@@ -248,7 +256,11 @@ public class EnchantmentWrapper {
     }
 
     public void setIncompatMode(int value) {
-        this.incompatMode = value;
+        this.incompatMode = MathHelper.clamp(value, 0, 1);
+    }
+
+    public boolean hasIncompatibleEnchantments() {
+        return this.hasIncompat;
     }
 
     public Set<ResourceLocation> getIncompatibleEnchantments() {
@@ -256,13 +268,21 @@ public class EnchantmentWrapper {
     }
 
     public void addIncompatibleEnchantment(ResourceLocation registryName) {
+        if (!this.hasIncompat) {
+            this.hasIncompat = true;
+            this.incompatibleEnchants = new HashSet<ResourceLocation>();
+        }
         this.incompatibleEnchants.add(registryName);
+    }
+
+    private boolean isEnchantmentExist(ResourceLocation registryName) {
+        return this.hasIncompat && this.incompatibleEnchants.contains(registryName);
     }
 
     public boolean isCompatibleWith(Enchantment enchantment) {
         return this.incompatMode == 0 ? 
-                this.wrapped.isCompatibleWith(enchantment) && !this.incompatibleEnchants.contains(enchantment.getRegistryName()) 
-                : !this.incompatibleEnchants.contains(enchantment.getRegistryName());
+                this.wrapped.isCompatibleWith(enchantment) && !this.isEnchantmentExist(enchantment.getRegistryName()) 
+                : !this.isEnchantmentExist(enchantment.getRegistryName());
     }
 
     public int getApplicabilityMode() {
@@ -270,7 +290,7 @@ public class EnchantmentWrapper {
     }
 
     public void setApplicabilityMode(int value) {
-        this.applicabilityMode = value;
+        this.applicabilityMode = MathHelper.clamp(value, 0, 1);
     }
 
     public int getListMode() {
@@ -278,24 +298,77 @@ public class EnchantmentWrapper {
     }
 
     public void setListMode(int value) {
-        this.listMode = value;
+        this.listMode = MathHelper.clamp(value, 0, 1);
     }
 
-    public Set<ResourceLocation> getItems() {
+    public boolean hasItemList() {
+        return this.hasItemsList;
+    }
+
+    public Set<ResourceLocation> getItemList() {
         return this.itemsList;
     }
 
-    public boolean isItemExist(ItemStack itemStack) {
-        return this.itemsList.contains(itemStack.getItem().getRegistryName());
+    public void addItem(ResourceLocation registryName) {
+        if (!this.hasItemsList) {
+            this.hasItemsList = true;
+            this.itemsList = new HashSet<ResourceLocation>();
+        }
+        this.itemsList.add(registryName);
     }
 
-    public void addItem(ResourceLocation registryName) {
-        this.itemsList.add(registryName);
+    private boolean isItemExist(ItemStack itemStack) {
+        return this.hasItemsList && this.itemsList.contains(itemStack.getItem().getRegistryName());
     }
 
     public boolean canApply(ItemStack itemStack) {
         return this.applicabilityMode == 0 ? 
                 this.wrapped.canApply(itemStack) && (this.listMode > 0 ? this.isItemExist(itemStack) : !this.isItemExist(itemStack))
                 : (this.listMode > 0 ? this.isItemExist(itemStack) : !this.isItemExist(itemStack));
+    }
+
+    public boolean isTreasure() {
+        return this.isTreasure;
+    }
+
+    public void setTreasure(boolean flag) {
+        this.isTreasure = flag;
+    }
+
+    public boolean shouldDoublePrice() {
+        return this.doublePrice;
+    }
+
+    public void setDoublePrice(boolean flag) {
+        this.doublePrice = flag;
+    }
+
+    public boolean isCurse() {
+        return this.isCurse;
+    }
+
+    public void setCurse(boolean flag) {
+        this.isCurse = flag;
+    }
+
+    public boolean isAllowedOnBooks() {
+        return this.isAllowedOnBooks;
+    }
+
+    public void setAllowedOnBooks(boolean flag) {
+        this.isAllowedOnBooks = flag;
+    }
+
+    public void initDescription(int size) {
+        this.description = new String[size];
+        this.hasDesc = true;
+    }
+
+    public boolean hasDescription() {
+        return this.hasDesc;
+    }
+
+    public String[] getDescription() {
+        return  this.description;
     }
 }

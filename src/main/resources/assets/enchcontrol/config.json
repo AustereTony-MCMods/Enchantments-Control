@@ -4,5 +4,11 @@
    "debug_mode": true,
    "custom_update_checker": false,
    "enable_custom_localization": false
+  },
+  "tooltips": {
+    "enabled": true,
+    "allow_for_books": true,
+    "allow_for_items": true,
+    "show_domain": true
   }
 }

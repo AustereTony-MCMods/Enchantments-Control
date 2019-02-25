@@ -10,7 +10,7 @@ import net.minecraft.launchwrapper.IClassTransformer;
 
 public class ECClassTransformer implements IClassTransformer {
 
-    public static final Logger CORE_LOGGER = LogManager.getLogger("EC Core");
+    public static final Logger CORE_LOGGER = LogManager.getLogger("Enchantments Control Core");
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
@@ -41,6 +41,8 @@ public class ECClassTransformer implements IClassTransformer {
         classReader.accept(classNode, enumInput.readerFlags);
         if (enumInput.patch(classNode))
             CORE_LOGGER.info("{} <{}.class> patched!", enumInput.domain, enumInput.clazz);
+        else
+            CORE_LOGGER.info("{} <{}.class> patch FAILED!", enumInput.domain, enumInput.clazz);
         ClassWriter writer = new ClassWriter(enumInput.writerFlags);        
         classNode.accept(writer);
         return writer.toByteArray();    

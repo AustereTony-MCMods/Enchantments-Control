@@ -8,7 +8,11 @@ public enum EnumConfigSettings {
     EXTERNAL_CONFIG(0, "main", "external_config", true),
     DEBUG_MODE(0, "main", "debug_mode"),
     CHECK_UPDATES(0, "main", "custom_update_checker"),
-    CUSTOM_LOCALIZATION(0, "main", "enable_custom_localization");
+    CUSTOM_LOCALIZATION(0, "main", "enable_custom_localization"),
+    TOOLTIPS(0, "tooltips", "enabled"),
+    TOOLTIPS_FOR_BOOKS(0, "tooltips", "allow_for_books"),
+    TOOLTIPS_FOR_ITEMS(0, "tooltips", "allow_for_items"),
+    TOOLTIPS_SHOW_DOMAIN(0, "tooltips", "show_domain");
 
     public final int type;//0 - boolean
 

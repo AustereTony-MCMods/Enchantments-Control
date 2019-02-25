@@ -53,7 +53,7 @@ public class ConfigLoader {
     MIN_ENCH_DEFAULT_EVAL = "1+LVL*10",
     MAX_ENCH_DEFAULT_EVAL = "MIN+5";
 
-    public static boolean settingsApplied, runningAtDedicatedServer;
+    public static boolean runningAtDedicatedServer;
 
     private static final DateFormat BACKUP_DATE_FORMAT = new SimpleDateFormat("yy_MM_dd-HH-mm-ss");
 
@@ -158,11 +158,13 @@ public class ConfigLoader {
         ECMain.LOGGER.info("Loading data...");
         EnumConfigSettings.initAll(configFile);
         JsonObject enchObject;
+        JsonArray descArray;
         EnchantmentWrapper wrapper;
         String rarityStr, typeStr;
         Enchantment.Rarity rarity;
         EnumEnchantmentType type = null;
         EntityEquipmentSlot[] equipmentSlots;
+        int i = 0;
         for (JsonElement enchElement : settingsFile) {
             enchObject = enchElement.getAsJsonObject();
             rarityStr = enchObject.get(EnumEnchantmentsKeys.RARITY.key).getAsString();
@@ -190,6 +192,10 @@ public class ConfigLoader {
                             enchObject.get(EnumEnchantmentsKeys.MAX_LEVEL.key).getAsInt(),
                             type,
                             getSlots(enchObject.get(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key).getAsJsonArray()));
+            wrapper.setTreasure(enchObject.get(EnumEnchantmentsKeys.TREASURE.key).getAsBoolean());
+            wrapper.setDoublePrice(enchObject.get(EnumEnchantmentsKeys.DOUBLE_PRICE.key).getAsBoolean());
+            wrapper.setCurse(enchObject.get(EnumEnchantmentsKeys.CURSE.key).getAsBoolean());
+            wrapper.setAllowedOnBooks(enchObject.get(EnumEnchantmentsKeys.ALLOWED_ON_BOOKS.key).getAsBoolean());
             wrapper.setCustomEvals(enchObject.get(EnumEnchantmentsKeys.CUSTOM_EVALUATIONS.key).getAsBoolean());
             wrapper.setMinEnchantabilityEvaluation(enchObject.get(EnumEnchantmentsKeys.MIN_ENCH_EVAL.key).getAsString());
             wrapper.setMaxEnchantabilityEvaluation(enchObject.get(EnumEnchantmentsKeys.MAX_ENCH_EVAL.key).getAsString());
@@ -200,6 +206,12 @@ public class ConfigLoader {
             wrapper.setListMode(enchObject.get(EnumEnchantmentsKeys.ITEMS_LIST_MODE.key).getAsInt());
             for (JsonElement incompatElement : enchObject.get(EnumEnchantmentsKeys.ITEMS_LIST.key).getAsJsonArray())
                 wrapper.addItem(new ResourceLocation(incompatElement.getAsString()));
+            if ((descArray = enchObject.get(EnumEnchantmentsKeys.DESCRIPTION.key).getAsJsonArray()).size() > 0) {
+                wrapper.initDescription(descArray.size());
+                i = 0;
+                for (JsonElement lineElement : descArray)
+                    wrapper.getDescription()[i++] = lineElement.getAsString();
+            }
         }
     }
 
@@ -291,20 +303,25 @@ public class ConfigLoader {
                 .create();  
         JsonArray 
         enchsArray = new JsonArray(),
-        equipArray, incompatArray, itemsArray;
+        equipArray, incompatArray, itemsArray, descArray;
         JsonObject enchObject;
         for (EnchantmentWrapper wrapper : EnchantmentWrapper.getWrappers()) {
             enchObject = new JsonObject();
             equipArray = new JsonArray();
             incompatArray = new JsonArray();
             itemsArray = new JsonArray();
+            descArray = new JsonArray();
             enchObject.add(EnumEnchantmentsKeys.ID.key, new JsonPrimitive(wrapper.id.toString()));
             enchObject.add(EnumEnchantmentsKeys.UNLOCALIZED_NAME.key, new JsonPrimitive(wrapper.getName()));
-            enchObject.add(EnumEnchantmentsKeys.ENABLED.key, new JsonPrimitive(true));
+            enchObject.add(EnumEnchantmentsKeys.ENABLED.key, new JsonPrimitive(wrapper.isEnabled()));
             enchObject.add(EnumEnchantmentsKeys.RARITY.key, new JsonPrimitive(wrapper.getRarity().toString()));
+            enchObject.add(EnumEnchantmentsKeys.TREASURE.key, new JsonPrimitive(wrapper.isTreasure()));
+            enchObject.add(EnumEnchantmentsKeys.DOUBLE_PRICE.key, new JsonPrimitive(wrapper.shouldDoublePrice()));
+            enchObject.add(EnumEnchantmentsKeys.CURSE.key, new JsonPrimitive(wrapper.isCurse()));
+            enchObject.add(EnumEnchantmentsKeys.ALLOWED_ON_BOOKS.key, new JsonPrimitive(wrapper.isAllowedOnBooks()));
             enchObject.add(EnumEnchantmentsKeys.MIN_LEVEL.key, new JsonPrimitive(wrapper.getMinLevel()));
             enchObject.add(EnumEnchantmentsKeys.MAX_LEVEL.key, new JsonPrimitive(wrapper.getMaxLevel()));
-            enchObject.add(EnumEnchantmentsKeys.CUSTOM_EVALUATIONS.key, new JsonPrimitive(false));
+            enchObject.add(EnumEnchantmentsKeys.CUSTOM_EVALUATIONS.key, new JsonPrimitive(wrapper.useCustomEvals()));
             enchObject.add(EnumEnchantmentsKeys.MIN_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMinEnchantabilityEval()));
             enchObject.add(EnumEnchantmentsKeys.MAX_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMaxEnchantabilityEval()));
             enchObject.add(EnumEnchantmentsKeys.TYPE.key, new JsonPrimitive(wrapper.getType() == null ? "NONE" : wrapper.getType().toString()));
@@ -312,14 +329,20 @@ public class ConfigLoader {
                 equipArray.add(new JsonPrimitive(equipment.toString()));
             enchObject.add(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key, equipArray);
             enchObject.add(EnumEnchantmentsKeys.INCOMPAT_MODE.key, new JsonPrimitive(wrapper.getIncompatMode()));
-            for (ResourceLocation regName : wrapper.getIncompatibleEnchantments())
-                incompatArray.add(new JsonPrimitive(regName.toString()));        
+            if (wrapper.hasIncompatibleEnchantments()) 
+                for (ResourceLocation regName : wrapper.getIncompatibleEnchantments())
+                    incompatArray.add(new JsonPrimitive(regName.toString()));        
             enchObject.add(EnumEnchantmentsKeys.INCOMPATIBLE_ENCHANTMENTS.key, incompatArray);
             enchObject.add(EnumEnchantmentsKeys.APPLICABILITY_MODE.key, new JsonPrimitive(wrapper.getApplicabilityMode()));
             enchObject.add(EnumEnchantmentsKeys.ITEMS_LIST_MODE.key, new JsonPrimitive(wrapper.getListMode()));
-            for (ResourceLocation regName : wrapper.getItems())
-                itemsArray.add(new JsonPrimitive(regName.toString()));
-            enchObject.add(EnumEnchantmentsKeys.ITEMS_LIST.key, incompatArray);
+            if (wrapper.hasItemList()) 
+                for (ResourceLocation regName : wrapper.getItemList())
+                    itemsArray.add(new JsonPrimitive(regName.toString()));
+            enchObject.add(EnumEnchantmentsKeys.ITEMS_LIST.key, itemsArray);
+            if (wrapper.hasDescription())
+                for (String line : wrapper.getDescription())
+                    descArray.add(new JsonPrimitive(line));
+            enchObject.add(EnumEnchantmentsKeys.DESCRIPTION.key, descArray);
             enchsArray.add(enchObject);
         }              
         try (Writer writer = new FileWriter(EXT_DATA_FILE)) {             

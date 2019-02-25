@@ -6,6 +6,10 @@ public enum EnumEnchantmentsKeys {
     ENABLED("enabled"),
     UNLOCALIZED_NAME("name"),
     RARITY("rarity"),
+    TREASURE("treasure"),
+    DOUBLE_PRICE("double_price"),
+    CURSE("curse"),
+    ALLOWED_ON_BOOKS("allowed_on_books"),
     MIN_LEVEL("min_lvl"),
     MAX_LEVEL("max_lvl"),
     CUSTOM_EVALUATIONS("custom_evaluations"),
@@ -17,7 +21,8 @@ public enum EnumEnchantmentsKeys {
     INCOMPATIBLE_ENCHANTMENTS("incompatible"),
     APPLICABILITY_MODE("applicability_mode"),
     ITEMS_LIST_MODE("items_list_mode"),
-    ITEMS_LIST("items_list");
+    ITEMS_LIST("items_list"),
+    DESCRIPTION("description");
 
     public final String key;
 

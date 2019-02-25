@@ -197,6 +197,34 @@ public enum EnumChatMessages {
                 msg2 = new TextComponentString(" " + ench.getRarity().toString());
                 msg2.getStyle().setColor(TextFormatting.WHITE);
                 CommonReference.sendMessage(player, msg1.appendSibling(msg2));
+                //Treasure
+                msg1 = new TextComponentTranslation("ec.command.info.treasure");
+                msg1.getStyle().setColor(TextFormatting.AQUA);
+                msg2 = new TextComponentString(" ");
+                msg3 = new TextComponentTranslation(wrapper.isTreasure() ? "ec.command.info.yes" : "ec.command.info.no");
+                msg3.getStyle().setColor(wrapper.isTreasure() ? TextFormatting.DARK_GREEN : TextFormatting.DARK_RED);
+                CommonReference.sendMessage(player, msg1.appendSibling(msg2).appendSibling(msg3));
+                //Double price
+                msg1 = new TextComponentTranslation("ec.command.info.doubledPrice");
+                msg1.getStyle().setColor(TextFormatting.AQUA);
+                msg2 = new TextComponentString(" ");
+                msg3 = new TextComponentTranslation(wrapper.shouldDoublePrice() ? "ec.command.info.yes" : "ec.command.info.no");
+                msg3.getStyle().setColor(wrapper.shouldDoublePrice() ? TextFormatting.DARK_GREEN : TextFormatting.DARK_RED);
+                CommonReference.sendMessage(player, msg1.appendSibling(msg2).appendSibling(msg3));
+                //Curse
+                msg1 = new TextComponentTranslation("ec.command.info.curse");
+                msg1.getStyle().setColor(TextFormatting.AQUA);
+                msg2 = new TextComponentString(" ");
+                msg3 = new TextComponentTranslation(wrapper.isCurse() ? "ec.command.info.yes" : "ec.command.info.no");
+                msg3.getStyle().setColor(wrapper.isCurse() ? TextFormatting.DARK_GREEN : TextFormatting.DARK_RED);
+                CommonReference.sendMessage(player, msg1.appendSibling(msg2).appendSibling(msg3));
+                //Allowed on books
+                msg1 = new TextComponentTranslation("ec.command.info.allowedOnBooks");
+                msg1.getStyle().setColor(TextFormatting.AQUA);
+                msg2 = new TextComponentString(" ");
+                msg3 = new TextComponentTranslation(wrapper.isAllowedOnBooks() ? "ec.command.info.yes" : "ec.command.info.no");
+                msg3.getStyle().setColor(wrapper.isAllowedOnBooks() ? TextFormatting.DARK_GREEN : TextFormatting.DARK_RED);
+                CommonReference.sendMessage(player, msg1.appendSibling(msg2).appendSibling(msg3));
                 //Min - max levels
                 msg1 = new TextComponentTranslation("ec.command.info.levels");
                 msg1.getStyle().setColor(TextFormatting.AQUA);
@@ -232,7 +260,7 @@ public enum EnumChatMessages {
                 //Type
                 msg1 = new TextComponentTranslation("ec.command.info.type");
                 msg1.getStyle().setColor(TextFormatting.AQUA);
-                msg2 = new TextComponentString(" " + ench.type == null ? "NONE" : ench.type.toString());
+                msg2 = new TextComponentString(" " + (ench.type == null ? "NONE" : ench.type.toString()));
                 msg2.getStyle().setColor(TextFormatting.WHITE);
                 CommonReference.sendMessage(player, msg1.appendSibling(msg2));
                 //Slots
@@ -252,9 +280,10 @@ public enum EnumChatMessages {
                 msg1 = new TextComponentTranslation("ec.command.info.incompat");
                 msg1.getStyle().setColor(TextFormatting.AQUA);
                 CommonReference.sendMessage(player, msg1);
-                for (ResourceLocation l : wrapper.getIncompatibleEnchantments())
-                    CommonReference.sendMessage(player, new TextComponentString(l.toString()));
-                if (wrapper.getIncompatibleEnchantments().isEmpty())
+                if (wrapper.hasIncompatibleEnchantments())
+                    for (ResourceLocation l : wrapper.getIncompatibleEnchantments())
+                        CommonReference.sendMessage(player, new TextComponentString(l.toString()));
+                if (!wrapper.hasIncompatibleEnchantments())
                     CommonReference.sendMessage(player, new TextComponentTranslation("ec.command.info.empty"));
                 //Items list status
                 msg1 = new TextComponentTranslation("ec.command.info.listStatus");
@@ -263,20 +292,30 @@ public enum EnumChatMessages {
                 msg3 = new TextComponentTranslation(wrapper.getApplicabilityMode() == 0 ? "ec.command.info.incompatStatus.both" : "ec.command.info.incompatStatus.custom");
                 msg3.getStyle().setColor(TextFormatting.WHITE);
                 CommonReference.sendMessage(player, msg1.appendSibling(msg2).appendSibling(msg3));
-                //Items list mode
+                //Item list mode
                 msg1 = new TextComponentTranslation("ec.command.info.listMode");
                 msg1.getStyle().setColor(TextFormatting.AQUA);
                 msg2 = new TextComponentString(" ");
                 msg3 = new TextComponentTranslation(wrapper.getListMode() > 0 ? "ec.command.info.whitelist" : "ec.command.info.blacklist");
                 msg3.getStyle().setColor(wrapper.getListMode() > 0 ? TextFormatting.DARK_GREEN : TextFormatting.DARK_RED);
                 CommonReference.sendMessage(player, msg1.appendSibling(msg2).appendSibling(msg3));
-                //Items list
+                //Item list
                 msg1 = new TextComponentTranslation("ec.command.info.itemsList");
                 msg1.getStyle().setColor(TextFormatting.AQUA);
                 CommonReference.sendMessage(player, msg1);
-                for (ResourceLocation l : wrapper.getItems())
-                    CommonReference.sendMessage(player, new TextComponentString(l.toString()));
-                if (wrapper.getItems().isEmpty())
+                if (wrapper.hasItemList())
+                    for (ResourceLocation l : wrapper.getItemList())
+                        CommonReference.sendMessage(player, new TextComponentString(l.toString()));
+                if (!wrapper.hasItemList())
+                    CommonReference.sendMessage(player, new TextComponentTranslation("ec.command.info.empty"));
+                //Description
+                msg1 = new TextComponentTranslation("ec.command.info.desc");
+                msg1.getStyle().setColor(TextFormatting.AQUA);
+                CommonReference.sendMessage(player, msg1);
+                if (wrapper.hasDescription())
+                    for (String s : wrapper.getDescription())
+                        CommonReference.sendMessage(player, new TextComponentTranslation(s));
+                if (!wrapper.hasDescription())
                     CommonReference.sendMessage(player, new TextComponentTranslation("ec.command.info.empty"));
 
             } else {

@@ -110,12 +110,13 @@ public enum EnumInputClasses {
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
                 while (insnIterator.hasNext()) {                        
                     currentInsn = insnIterator.next();                  
-                    if (currentInsn.getOpcode() == Opcodes.ASTORE) {    
+                    if (currentInsn.getOpcode() == Opcodes.ALOAD) {    
                         InsnList nodesList = new InsnList();   
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getEnchantmentName", "(L" + enchantmentClassName + ";)L" + stringClassName + ";", false));
-                        nodesList.add(new VarInsnNode(Opcodes.ASTORE, 2));
-                        methodNode.instructions.insert(currentInsn, nodesList); 
+                        nodesList.add(new VarInsnNode(Opcodes.ILOAD, 1));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getTranslatedName", "(L" + enchantmentClassName + ";I)L" + stringClassName + ";", false));
+                        nodesList.add(new InsnNode(Opcodes.ARETURN));
+                        methodNode.instructions.insertBefore(currentInsn, nodesList); 
                         isSuccessful = true;                        
                         break;
                     }
@@ -161,7 +162,8 @@ public enum EnumInputClasses {
         String
         addMerchantRecipeMethodName = ECCorePlugin.isObfuscated() ? "a" : "addMerchantRecipe",
                 enchantmentClassName = ECCorePlugin.isObfuscated() ? "alk" : "net/minecraft/enchantment/Enchantment",
-                        randomClassName = "java/util/Random";
+                        merchantRecipeListClassName = ECCorePlugin.isObfuscated() ? "amh" : "net/minecraft/village/MerchantRecipeList",
+                                randomClassName = "java/util/Random";
         boolean isSuccessful = false;   
         AbstractInsnNode currentInsn;
 
@@ -170,20 +172,13 @@ public enum EnumInputClasses {
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
                 while (insnIterator.hasNext()) {                        
                     currentInsn = insnIterator.next();       
-                    if (currentInsn.getOpcode() == Opcodes.ASTORE) {    
+                    if (currentInsn.getOpcode() == Opcodes.GETSTATIC) {    
                         InsnList nodesList = new InsnList();   
+                        nodesList.add(new VarInsnNode(Opcodes.ALOAD, 2));
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
-                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getRandomEnchantment", "(L" + randomClassName + ";)L" + enchantmentClassName + ";", false));
-                        nodesList.add(new VarInsnNode(Opcodes.ASTORE, 4));
-                        methodNode.instructions.insert(currentInsn, nodesList); 
-                    }
-                    if (currentInsn.getOpcode() == Opcodes.ISTORE) {    
-                        InsnList nodesList = new InsnList();   
-                        nodesList.add(new VarInsnNode(Opcodes.ALOAD, 4));
-                        nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
-                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "randomizeEnchantmentLevel", "(L" + enchantmentClassName + ";L" + randomClassName + ";)I", false));
-                        nodesList.add(new VarInsnNode(Opcodes.ISTORE, 5));
-                        methodNode.instructions.insert(currentInsn, nodesList); 
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "addMerchantRecipe", "(L" + merchantRecipeListClassName + ";L" + randomClassName + ";)V", false));
+                        nodesList.add(new InsnNode(Opcodes.RETURN));
+                        methodNode.instructions.insertBefore(currentInsn, nodesList); 
                         isSuccessful = true;                        
                         break;
                     }

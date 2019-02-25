@@ -31,7 +31,7 @@ public class ECMain {
     public static final String 
     MODID = "enchcontrol", 
     NAME = "Enchantments Control", 
-    VERSION = "1.0.1", 
+    VERSION = "1.1.0", 
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_forge.json",
@@ -39,7 +39,7 @@ public class ECMain {
     PROJECT_LOCATION = "minecraft.curseforge.com",
     PROJECT_URL = "https://minecraft.curseforge.com/projects/enchantments-control";
 
-    public static final Logger LOGGER = LogManager.getLogger("EC");
+    public static final Logger LOGGER = LogManager.getLogger(NAME);
 
     public static final Map<String, String> MODS_NAMES = new HashMap<String, String>();
 
