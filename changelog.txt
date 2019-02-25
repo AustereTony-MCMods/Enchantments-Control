@@ -1,3 +1,18 @@
+1.1.0b
++Added "treasure enchhantment" property. Also there are ability to disable 
+doubled price for treasure enchantments.
++Added "curse" property.
++Added "allowed on books" property.
++Multiple optimizations.
++Fixes:
+ - Redacted enchantability expressions, provided as example - now they are fully match actual 
+ evaluations used in mc sources.
+ - Fixed enchantment names creation problems.
+ - Fixed "enabled" flag reset on "/ec update" usage.
+ - Fixed "custom evaluations" flag reset on "/ec update" usage.
+ - Fixed "items list" array content swapping with "incompatible" array content on "/ec update" usage.
+ - Fixed enchantment type display problems with "/ec info"
+
 1.0.1b
 +Fixed enchantments wrapper behavior, it will wrap enchantment on first call now.
 +Code cleanup.

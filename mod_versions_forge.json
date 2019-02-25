@@ -1,10 +1,10 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/enchantments-control",
   "1.12.2": {
-    "1.0.1": "Hotfix for issue #1." 
+    "1.1.0": "Access to additional properties. Fixes and optimizations."
   },
   "promos": {
-    "1.12.2-latest": "1.0.1",
-    "1.12.2-recommended": "1.0.1"
+    "1.12.2-latest": "1.1.0",
+    "1.12.2-recommended": "1.1.0"
   }
 }
