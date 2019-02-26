@@ -1,0 +1,4 @@
+Thermal Expansion
+=================
+1. Support for Arcane Ensorcellator mechanism:
+ - recipes which uses disabled enchantments will be unavailable.
