@@ -53,7 +53,7 @@ public class CommandEC extends CommandBase {
             break;
         case LIST_ALL:
             if (!this.validAction(player, false, false, false, false)) break;
-            EnumChatMessages.COMMAND_EC_LIST_ALL.sendMessage(player);
+            EnumChatMessages.COMMAND_EC_LIST_ALL.sendMessage(player, arg.getProcessingArgument(args));
             break;
         case FILE_ALL:
             if (!this.validAction(player, true, false, false, true)) break;
@@ -62,7 +62,7 @@ public class CommandEC extends CommandBase {
             break;
         case LIST_UNKNOWN:
             if (!this.validAction(player, false, false, true, false)) break;
-            EnumChatMessages.COMMAND_EC_LIST_UNKNOWN.sendMessage(player);
+            EnumChatMessages.COMMAND_EC_LIST_UNKNOWN.sendMessage(player, arg.getProcessingArgument(args));
             break;
         case FILE_UNKNOWN:
             if (!this.validAction(player, true, false, true, true)) break;

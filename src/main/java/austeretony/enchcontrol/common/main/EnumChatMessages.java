@@ -89,9 +89,16 @@ public enum EnumChatMessages {
             }
             break;
         case COMMAND_EC_LIST_ALL:
+            if (!(args[0].equals("-r") || args[0].equals("-nr"))) {
+                msg1 = new TextComponentTranslation("ec.command.err.wrongArg");
+                msg1.getStyle().setColor(TextFormatting.RED);
+                CommonReference.sendMessage(player, prefix().appendSibling(msg1));
+                break;
+            }
             CommonReference.sendMessage(player, prefix().appendSibling(new TextComponentTranslation("ec.command.list-all")));
             Set<String> sortedModNames = new TreeSet<String>();
             Multimap<String, EnchantmentWrapper> wrappersByModNames = HashMultimap.<String, EnchantmentWrapper>create();
+            boolean showRegistry = args[0].equals("-r");
             for (EnchantmentWrapper wrapper: EnchantmentWrapper.getWrappers()) {
                 modName = ECMain.MODS_NAMES.get(wrapper.modid);
                 modName = modName == null ? "Undefined" : modName;
@@ -108,9 +115,14 @@ public enum EnumChatMessages {
                     nameLog.getStyle().setColor(TextFormatting.AQUA);
                     name = new TextComponentTranslation(w.getName());
                     name.getStyle().setColor(TextFormatting.WHITE);
-                    regNameLog = new TextComponentString(", RN: ");
-                    regName = new TextComponentString(w.id.toString());
-                    regName.getStyle().setColor(TextFormatting.WHITE);
+                    if (showRegistry) {
+                        regNameLog = new TextComponentString(", RN: ");
+                        regName = new TextComponentString(w.registryName.toString());
+                        regName.getStyle().setColor(TextFormatting.WHITE);
+                    } else {
+                        regNameLog = new TextComponentString("");
+                        regName = new TextComponentString("");
+                    }
                     CommonReference.sendMessage(player, modLog.appendSibling(mod).appendSibling(nameLog).appendSibling(name).appendSibling(regNameLog).appendSibling(regName));
                 }
             }
@@ -121,26 +133,41 @@ public enum EnumChatMessages {
             CommonReference.sendMessage(player, prefix().appendSibling(msg1));
             break;
         case COMMAND_EC_LIST_UNKNOWN:
+            if (!(args[0].equals("-r") || args[0].equals("-nr"))) {
+                msg1 = new TextComponentTranslation("ec.command.err.wrongArg");
+                msg1.getStyle().setColor(TextFormatting.RED);
+                CommonReference.sendMessage(player, prefix().appendSibling(msg1));
+                break;
+            }
             CommonReference.sendMessage(player, prefix().appendSibling(new TextComponentTranslation("ec.command.list-unknown")));
             Set<String> sortedModNames2 = new TreeSet<String>();
-            Multimap<String, String> enchNamesByModNames = HashMultimap.<String, String>create();
+            Multimap<String, EnchantmentWrapper> wrappersByModNames2 = HashMultimap.<String, EnchantmentWrapper>create();
+            boolean showRegistry2 = args[0].equals("-r");
             for (EnchantmentWrapper wrapper: EnchantmentWrapper.UNKNOWN) {
                 modName = ECMain.MODS_NAMES.get(wrapper.modid);
                 modName = modName == null ? "Undefined" : modName;
                 sortedModNames2.add(modName);
-                enchNamesByModNames.put(modName, wrapper.getName());
+                wrappersByModNames2.put(modName, wrapper);
             }
             for (String s : sortedModNames2) {
-                for (String n : enchNamesByModNames.get(s)) {
+                for (EnchantmentWrapper w : wrappersByModNames2.get(s)) {
                     modLog = new TextComponentString("M: ");
                     modLog.getStyle().setColor(TextFormatting.AQUA);
                     mod = new TextComponentTranslation(s);
                     mod.getStyle().setColor(TextFormatting.WHITE);
                     nameLog = new TextComponentString(", N: ");
                     nameLog.getStyle().setColor(TextFormatting.AQUA);
-                    name = new TextComponentTranslation(n);
+                    name = new TextComponentTranslation(w.getName());
                     name.getStyle().setColor(TextFormatting.WHITE);
-                    CommonReference.sendMessage(player, modLog.appendSibling(mod).appendSibling(nameLog).appendSibling(name));
+                    if (showRegistry2) {
+                        regNameLog = new TextComponentString(", RN: ");
+                        regName = new TextComponentString(w.registryName.toString());
+                        regName.getStyle().setColor(TextFormatting.WHITE);
+                    } else {
+                        regNameLog = new TextComponentString("");
+                        regName = new TextComponentString("");
+                    }
+                    CommonReference.sendMessage(player, modLog.appendSibling(mod).appendSibling(nameLog).appendSibling(name).appendSibling(regNameLog).appendSibling(regName));
                 }
             }
             break;

@@ -24,13 +24,13 @@ public class EnchantmentWrapper {
 
     public static final Set<EnchantmentWrapper> UNKNOWN = new HashSet<EnchantmentWrapper>();
 
-    public final ResourceLocation id;
+    public final ResourceLocation registryName;
 
     public final String modid;
 
     private boolean enabled, initialized, customEvals, isTreasure, doublePrice, isCurse, isAllowedOnBooks, hasIncompat, hasItemsList, hasDesc;
 
-    private String name, minEnchEval, maxEnchEval;
+    private String name, minEnchEval, maxEnchEval, typeStr;
 
     private int[][] enchantability;//first column - MIN enchantability, second column - MAX enchantability
 
@@ -52,7 +52,7 @@ public class EnchantmentWrapper {
     private Enchantment wrapped;
 
     private EnchantmentWrapper(ResourceLocation registryName) {
-        this.id = registryName;
+        this.registryName = registryName;
         this.modid = registryName.getResourceDomain();
         WRAPPERS.put(registryName, this);
     }
@@ -104,7 +104,15 @@ public class EnchantmentWrapper {
                 if (!wrapper.isEnabled())
                     ECMain.LOGGER.info("Enchantment <{}> disabled! It can't be obtained in survival mode.", registryName);
                 enchantment.rarity = wrapper.getRarity();
-                enchantment.type = wrapper.getType();
+                EnumEnchantmentType type;
+                try {
+                    type = EnumEnchantmentType.valueOf(wrapper.getTypeString());
+                } catch(IllegalArgumentException exception) {
+                    ECMain.LOGGER.error("Unknown enchantment type: <{}>! Enchantment will be initialized with base type: <{}>.", wrapper.getTypeString(), enchantment.type == null ? "NULL" : enchantment.type.toString());
+                    type = enchantment.type;
+                }
+                wrapper.setType(type);
+                enchantment.type = type;
                 enchantment.applicableEquipmentTypes = wrapper.getEquipmentSlots();
                 wrapper.setEnchantment(enchantment);
                 wrapper.calculateEnchantability();
@@ -233,6 +241,14 @@ public class EnchantmentWrapper {
 
     public void setMaxLevel(int value) {
         this.maxLevel = value;
+    }
+
+    public String getTypeString() {
+        return this.typeStr;
+    }
+
+    public void setEnumTypeString(String typeStr) {
+        this.typeStr = typeStr;
     }
 
     public EnumEnchantmentType getType() {

@@ -3,9 +3,9 @@ package austeretony.enchcontrol.common.command;
 public enum EnumCommandECArgs {
 
     HELP("help"),
-    LIST_ALL("list-all"),
+    LIST_ALL("list-all", 1),
     FILE_ALL("file-all"),
-    LIST_UNKNOWN("list-unknown"),
+    LIST_UNKNOWN("list-unknown", 1),
     FILE_UNKNOWN("file-unknown"),
     CLEAR("clear"),
     RELOAD("reload"),

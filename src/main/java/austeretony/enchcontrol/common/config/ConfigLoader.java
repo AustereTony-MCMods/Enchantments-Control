@@ -36,7 +36,6 @@ import austeretony.enchcontrol.common.reference.CommonReference;
 import austeretony.enchcontrol.common.util.ECUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
 
@@ -160,9 +159,8 @@ public class ConfigLoader {
         JsonObject enchObject;
         JsonArray descArray;
         EnchantmentWrapper wrapper;
-        String rarityStr, typeStr;
+        String rarityStr;
         Enchantment.Rarity rarity;
-        EnumEnchantmentType type = null;
         EntityEquipmentSlot[] equipmentSlots;
         int i = 0;
         for (JsonElement enchElement : settingsFile) {
@@ -174,15 +172,6 @@ public class ConfigLoader {
                 ECMain.LOGGER.error("Unknown enchantment rarity: <{}>! Default type <COMMON> will be used.", rarityStr);
                 rarity = Enchantment.Rarity.COMMON;
             }
-            typeStr = enchObject.get(EnumEnchantmentsKeys.TYPE.key).getAsString();
-            if (!typeStr.equals("NONE")) {
-                try {
-                    type = EnumEnchantmentType.valueOf(typeStr);
-                } catch(IllegalArgumentException exception) {
-                    ECMain.LOGGER.error("Unknown enchantment type: <{}>! Default type <ALL> will be used.", typeStr);
-                    type = EnumEnchantmentType.ALL;
-                }
-            }
             wrapper = EnchantmentWrapper.create(
                     new ResourceLocation(enchObject.get(EnumEnchantmentsKeys.ID.key).getAsString()), 
                     enchObject.get(EnumEnchantmentsKeys.ENABLED.key).getAsBoolean(),
@@ -190,8 +179,9 @@ public class ConfigLoader {
                     rarity == null ? Enchantment.Rarity.COMMON : rarity,
                             enchObject.get(EnumEnchantmentsKeys.MIN_LEVEL.key).getAsInt(),
                             enchObject.get(EnumEnchantmentsKeys.MAX_LEVEL.key).getAsInt(),
-                            type,
+                            null,//Due to ability for modders to add custom EnumEnchantmentType values it is early to init it here, so enchantment type init moved to wrapper getter (where actual enchantment wrapping performed).
                             getSlots(enchObject.get(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key).getAsJsonArray()));
+            wrapper.setEnumTypeString(enchObject.get(EnumEnchantmentsKeys.TYPE.key).getAsString());
             wrapper.setTreasure(enchObject.get(EnumEnchantmentsKeys.TREASURE.key).getAsBoolean());
             wrapper.setDoublePrice(enchObject.get(EnumEnchantmentsKeys.DOUBLE_PRICE.key).getAsBoolean());
             wrapper.setCurse(enchObject.get(EnumEnchantmentsKeys.CURSE.key).getAsBoolean());
@@ -309,7 +299,7 @@ public class ConfigLoader {
             incompatArray = new JsonArray();
             itemsArray = new JsonArray();
             descArray = new JsonArray();
-            enchObject.add(EnumEnchantmentsKeys.ID.key, new JsonPrimitive(wrapper.id.toString()));
+            enchObject.add(EnumEnchantmentsKeys.ID.key, new JsonPrimitive(wrapper.registryName.toString()));
             enchObject.add(EnumEnchantmentsKeys.UNLOCALIZED_NAME.key, new JsonPrimitive(wrapper.getName()));
             enchObject.add(EnumEnchantmentsKeys.ENABLED.key, new JsonPrimitive(wrapper.isEnabled()));
             enchObject.add(EnumEnchantmentsKeys.RARITY.key, new JsonPrimitive(wrapper.getRarity().toString()));
@@ -322,7 +312,7 @@ public class ConfigLoader {
             enchObject.add(EnumEnchantmentsKeys.CUSTOM_EVALUATIONS.key, new JsonPrimitive(wrapper.useCustomEvals()));
             enchObject.add(EnumEnchantmentsKeys.MIN_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMinEnchantabilityEval()));
             enchObject.add(EnumEnchantmentsKeys.MAX_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMaxEnchantabilityEval()));
-            enchObject.add(EnumEnchantmentsKeys.TYPE.key, new JsonPrimitive(wrapper.getType() == null ? "NONE" : wrapper.getType().toString()));
+            enchObject.add(EnumEnchantmentsKeys.TYPE.key, new JsonPrimitive(wrapper.getType() == null ? "NULL" : wrapper.getType().toString()));
             for (EntityEquipmentSlot equipment : wrapper.getEquipmentSlots())
                 equipArray.add(new JsonPrimitive(equipment.toString()));
             enchObject.add(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key, equipArray);
@@ -353,51 +343,28 @@ public class ConfigLoader {
     public static void createEnchantmentsListFile(EnumEnchantmentListType enumType) {
         List<String> data = new ArrayList<String>();
         data.add("mod name - enchantment name - enchantment registry name");
-        String file, modName;
-        if (enumType == EnumEnchantmentListType.ALL) {
-            file = LIST_ALL_FILE;
-            Set<String> sortedModNames = new TreeSet<String>();
-            Multimap<String, EnchantmentWrapper> wrappersByModNames = HashMultimap.<String, EnchantmentWrapper>create();
-            for (EnchantmentWrapper wrapper: EnchantmentWrapper.getWrappers()) {
-                modName = ECMain.MODS_NAMES.get(wrapper.modid);
-                modName = modName == null ? "Undefined" : modName;
-                sortedModNames.add(modName);
-                wrappersByModNames.put(modName, wrapper);
-            }
-            StringBuilder stringBuilder;
-            for (String s : sortedModNames) {
-                for (EnchantmentWrapper w : wrappersByModNames.get(s)) {
-                    stringBuilder = new StringBuilder()
-                            .append(s)
-                            .append(" - ")
-                            .append(I18n.format(w.getName()))
-                            .append(" - ")
-                            .append(w.id.toString());
-                    data.add(stringBuilder.toString());
-                }
-            }
-        } else {
-            file = LIST_UNKNOWN_FILE;
-            Set<String> sortedModNames = new TreeSet<String>();
-            Multimap<String, String> enchNamesByModNames = HashMultimap.<String, String>create();
-            for (EnchantmentWrapper wrapper: EnchantmentWrapper.UNKNOWN) {
-                modName = ECMain.MODS_NAMES.get(wrapper.modid);
-                modName = modName == null ? "Undefined" : modName;
-                sortedModNames.add(modName);
-                enchNamesByModNames.put(modName, wrapper.getName());
-            }
-            StringBuilder stringBuilder;
-            for (String s : sortedModNames) {
-                for (String n : enchNamesByModNames.get(s)) {
-                    stringBuilder = new StringBuilder()
-                            .append(s)
-                            .append(" - ")
-                            .append(I18n.format(n));
-                    data.add(stringBuilder.toString());
-                }
+        String modName; 
+        Set<String> sortedModNames = new TreeSet<String>();
+        Multimap<String, EnchantmentWrapper> wrappersByModNames = HashMultimap.<String, EnchantmentWrapper>create();
+        for (EnchantmentWrapper wrapper : enumType == EnumEnchantmentListType.ALL ? EnchantmentWrapper.getWrappers() : EnchantmentWrapper.UNKNOWN) {
+            modName = ECMain.MODS_NAMES.get(wrapper.modid);
+            modName = modName == null ? "Undefined" : modName;
+            sortedModNames.add(modName);
+            wrappersByModNames.put(modName, wrapper);
+        }
+        StringBuilder stringBuilder;
+        for (String s : sortedModNames) {
+            for (EnchantmentWrapper w : wrappersByModNames.get(s)) {
+                stringBuilder = new StringBuilder()
+                        .append(s)
+                        .append(" - ")
+                        .append(I18n.format(w.getName()))
+                        .append(" - ")
+                        .append(w.registryName.toString());
+                data.add(stringBuilder.toString());
             }
         }
-        try (PrintWriter writer = new PrintWriter(file)) {      
+        try (PrintWriter writer = new PrintWriter(enumType == EnumEnchantmentListType.ALL ? LIST_ALL_FILE : LIST_UNKNOWN_FILE)) {      
             for (String line : data)
                 writer.println(line);
         } catch (IOException exception) {

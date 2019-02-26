@@ -1,7 +1,7 @@
 ec.command.help.title=Available commands:
-ec.command.help.list-all=show list of all available enchantments.
+ec.command.help.list-all=show all enchantments (args: -r, -nr).
 ec.command.help.file-all=create file with enchantments list.
-ec.command.help.list-unknown=show list of unknown enchntments.
+ec.command.help.list-unknown=show  unknown enchntments (args: -r, -nr).
 ec.command.help.file-unknown=create file with unknown enchantments list.
 ec.command.help.clear=clear enchantments settings file.
 ec.command.help.reload=reload enchantments settings.
@@ -53,6 +53,7 @@ ec.command.err.debugModeDisabled=Debug mode must be enabled.
 ec.command.err.unknownEnch=Unknown enchantment:
 ec.command.err.wrongExpression=Wrong expression:
 ec.command.err.runningDedicatedServer=Can't be used at dedicated server.
+ec.command.err.wrongArg=Wrong argument.
 
 ec.tooltip.holdKey=Hold %s to see description.
 ec.tooltip.noDesc=No description
