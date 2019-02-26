@@ -1,3 +1,13 @@
+1.1.1b
++Added ability to set descriptions for enchantments. Descriptionss can be shown for enchanted 
+items and books. Tooltips can be disabled and configured.
++Added support for Thermal Expansion Arcane Ensorcellator - recipes for disabled enchantments 
+will not work. Support can be disabled in config.
++Added translation for big enchantment level numbers (up to 50).
++Fixes:
+ - Fixed errors while loot generation process - the chests, which were supposed to 
+ contain the enchanted things were empty (fix for issue #3). Enchanted content now will be filtered properly.
+ 
 1.1.0b
 +Added "treasure enchhantment" property. Also there are ability to disable 
 doubled price for treasure enchantments.
