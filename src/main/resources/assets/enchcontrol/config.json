@@ -7,8 +7,12 @@
   },
   "tooltips": {
     "enabled": true,
+    "show_splitter": true,
     "allow_for_books": true,
     "allow_for_items": true,
     "show_domain": true
+  },
+  "mod_support": {
+    "thermal_expansion": true
   }
 }

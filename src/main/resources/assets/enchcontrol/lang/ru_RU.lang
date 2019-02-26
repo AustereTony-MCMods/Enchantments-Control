@@ -54,6 +54,10 @@ ec.command.err.unknownEnch=Неизвестные чары:
 ec.command.err.wrongExpression=Неправильное выражение:
 ec.command.err.runningDedicatedServer=Нельзя использовать на выделенном сервере.
 
+ec.tooltip.holdKey=Удерживайте %s чтобы посмотреть описание.
+ec.tooltip.noDesc=Нет описания
+ec.tooltip.addedBy=Добавлено
+
 ec.update.newVersion=Новая версия!
 ec.update.projectPage=Ссылка
 

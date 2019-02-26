@@ -14,6 +14,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import austeretony.enchcontrol.common.config.EnumConfigSettings;
+
 public enum EnumInputClasses {
 
     MC_LOCALE("Minecraft", "Locale", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
@@ -23,7 +25,9 @@ public enum EnumInputClasses {
     MC_ENCHANT_RANDOMLY("Minecraft", "EnchantRandomly", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_COMMAND_ENCHANT("Minecraft", "CommandEnchant", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_ITEM_ENCHANTED_BOOK("Minecraft", "ItemEnchantedBook", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
-    MC_CONTAINER_REPAIR("Minecraft", "ContainerRepair", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+    MC_CONTAINER_REPAIR("Minecraft", "ContainerRepair", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
+
+    TE_ENCHANTER_MANAGER("Thermal Expansion", "EnchanterManager", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 
     private static final String HOOKS_CLASS = "austeretony/enchcontrol/common/core/ECHooks";
 
@@ -41,21 +45,24 @@ public enum EnumInputClasses {
     public boolean patch(ClassNode classNode) {
         switch (this) {
         case MC_LOCALE:
-            return pathcMCLocale(classNode);
+            return EnumConfigSettings.CUSTOM_LOCALIZATION.isEnabled() && this.pathcMCLocale(classNode);
         case MC_ENCHANTMENT:
-            return pathcMCEnchantment(classNode);
+            return this.pathcMCEnchantment(classNode);
         case MC_ENCHANTMENT_HELPER:
-            return pathcMCEnchantmentHelper(classNode);
+            return this.pathcMCEnchantmentHelper(classNode);
         case MC_LIST_ENCHANTED_BOOK_FOR_EMERALDS:
-            return pathcMCListEnchantedBookForEmeralds(classNode);
+            return this.pathcMCListEnchantedBookForEmeralds(classNode);
         case MC_ENCHANT_RANDOMLY:
-            return pathcMCEnchantRandomly(classNode);
+            return this.pathcMCEnchantRandomly(classNode);
         case MC_COMMAND_ENCHANT:
-            return pathcMCCommandEnchant(classNode);
+            return this.pathcMCCommandEnchant(classNode);
         case MC_ITEM_ENCHANTED_BOOK:
-            return pathcMCItemEnchantedBook(classNode);
+            return this.pathcMCItemEnchantedBook(classNode);
         case MC_CONTAINER_REPAIR:
-            return pathcMCContainerRepair(classNode);
+            return this.pathcMCContainerRepair(classNode);
+
+        case TE_ENCHANTER_MANAGER:
+            return EnumConfigSettings.SUPPORT_THERMAL_EXPANSION.isEnabled() && this.pathcTEEnchanterManager(classNode);
         }
         return false;
     }
@@ -129,25 +136,41 @@ public enum EnumInputClasses {
 
     private boolean pathcMCEnchantmentHelper(ClassNode classNode) {
         String
-        getEnchantmentDatasMethodName = ECCorePlugin.isObfuscated() ? "a" : "getEnchantmentDatas",
-                itemStackClassName = ECCorePlugin.isObfuscated() ? "aip" : "net/minecraft/item/ItemStack",
-                        listClassName = "java/util/List";
+        removeIncompatibleMethodName = ECCorePlugin.isObfuscated() ? "a" : "removeIncompatible",
+                getEnchantmentDatasMethodName = ECCorePlugin.isObfuscated() ? "a" : "getEnchantmentDatas",
+                        enchantmentDataClassName = ECCorePlugin.isObfuscated() ? "aln" : "net/minecraft/enchantment/EnchantmentData",
+                                itemStackClassName = ECCorePlugin.isObfuscated() ? "aip" : "net/minecraft/item/ItemStack",
+                                        listClassName = "java/util/List";
         boolean isSuccessful = false;   
         AbstractInsnNode currentInsn;
 
-        for (MethodNode methodNode : classNode.methods) {               
+        for (MethodNode methodNode : classNode.methods) {      
+            if (methodNode.name.equals(removeIncompatibleMethodName) && methodNode.desc.equals("(L" + listClassName + ";L" + enchantmentDataClassName + ";)V")) {                         
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
+                while (insnIterator.hasNext()) {                        
+                    currentInsn = insnIterator.next();                  
+                    if (currentInsn.getOpcode() == Opcodes.ALOAD) {    
+                        InsnList nodesList = new InsnList();   
+                        nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                        nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "removeIncompatible", "(L" + listClassName + ";L" + enchantmentDataClassName + ";)V", false));
+                        nodesList.add(new InsnNode(Opcodes.RETURN));
+                        methodNode.instructions.insertBefore(currentInsn, nodesList); 
+                    }
+                }    
+            }
             if (methodNode.name.equals(getEnchantmentDatasMethodName) && methodNode.desc.equals("(IL" + itemStackClassName + ";Z)L" + listClassName + ";")) {                         
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
                 while (insnIterator.hasNext()) {                        
                     currentInsn = insnIterator.next();                  
-                    if (currentInsn.getOpcode() == Opcodes.ASTORE) {    
+                    if (currentInsn.getOpcode() == Opcodes.INVOKESTATIC) {    
                         InsnList nodesList = new InsnList();   
                         nodesList.add(new VarInsnNode(Opcodes.ILOAD, 0));
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
                         nodesList.add(new VarInsnNode(Opcodes.ILOAD, 2));
                         nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getEnchantmentDatas", "(IL" + itemStackClassName + ";Z)L" + listClassName + ";", false));
                         nodesList.add(new InsnNode(Opcodes.ARETURN));
-                        methodNode.instructions.insertBefore(currentInsn.getPrevious(), nodesList); 
+                        methodNode.instructions.insertBefore(currentInsn, nodesList); 
                         isSuccessful = true;                        
                         break;
                     }
@@ -212,8 +235,8 @@ public enum EnumInputClasses {
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 2));
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 0));
-                        nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, enchantRandomlyClassName, "enchantmentsFieldName", "L" + listClassName + ";"));
-                        nodesList.add(new FieldInsnNode(Opcodes.GETSTATIC, enchantRandomlyClassName, "loggerFieldName", "L" + loggerClassName + ";"));
+                        nodesList.add(new FieldInsnNode(Opcodes.GETFIELD, enchantRandomlyClassName, enchantmentsFieldName, "L" + listClassName + ";"));
+                        nodesList.add(new FieldInsnNode(Opcodes.GETSTATIC, enchantRandomlyClassName, loggerFieldName, "L" + loggerClassName + ";"));
                         nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "apply", "(L" + itemStackClassName + ";L" + randomClassName + ";L" + listClassName + ";L" + loggerClassName + ";)L" + itemStackClassName + ";", false));
                         nodesList.add(new InsnNode(Opcodes.ARETURN));
                         methodNode.instructions.insertBefore(currentInsn, nodesList); 
@@ -357,5 +380,35 @@ public enum EnumInputClasses {
             }
         }
         return isSuccessful;    
+    }
+
+    private boolean pathcTEEnchanterManager(ClassNode classNode) {
+        String
+        addDefaultEnchantmentRecipeMethodName = "addDefaultEnchantmentRecipe",
+        enchantmentClassName = "net/minecraft/enchantment/Enchantment";
+        boolean isSuccessful = false;   
+        AbstractInsnNode currentInsn;
+
+        for (MethodNode methodNode : classNode.methods) {               
+            if (methodNode.name.equals(addDefaultEnchantmentRecipeMethodName)) {                         
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
+                while (insnIterator.hasNext()) {                        
+                    currentInsn = insnIterator.next();                  
+                    if (currentInsn.getOpcode() == Opcodes.IFNONNULL) {    
+                        InsnList nodesList = new InsnList();   
+                        nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isInvalid", "(L" + enchantmentClassName + ";)Z", false));
+                        nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
+                        methodNode.instructions.insert(currentInsn, nodesList); 
+                        methodNode.instructions.remove(currentInsn.getPrevious());
+                        methodNode.instructions.remove(currentInsn);
+                        isSuccessful = true;                        
+                        break;
+                    }
+                }    
+                break;
+            }
+        }
+        return isSuccessful;
     }
 }

@@ -31,6 +31,10 @@ public class ECClassTransformer implements IClassTransformer {
             return patch(basicClass, EnumInputClasses.MC_ITEM_ENCHANTED_BOOK);
         case "net.minecraft.inventory.ContainerRepair":
             return patch(basicClass, EnumInputClasses.MC_CONTAINER_REPAIR);
+
+            //Support for Thermal Expansion Arcane Ensorcellator (tested for 5.5.3.41)
+        case "cofh.thermalexpansion.util.managers.machine.EnchanterManager":
+            return patch(basicClass, EnumInputClasses.TE_ENCHANTER_MANAGER);
         }
         return basicClass;
     }
@@ -42,7 +46,7 @@ public class ECClassTransformer implements IClassTransformer {
         if (enumInput.patch(classNode))
             CORE_LOGGER.info("{} <{}.class> patched!", enumInput.domain, enumInput.clazz);
         else
-            CORE_LOGGER.info("{} <{}.class> patch FAILED!", enumInput.domain, enumInput.clazz);
+            CORE_LOGGER.error("{} <{}.class> patch FAILED!", enumInput.domain, enumInput.clazz);
         ClassWriter writer = new ClassWriter(enumInput.writerFlags);        
         classNode.accept(writer);
         return writer.toByteArray();    

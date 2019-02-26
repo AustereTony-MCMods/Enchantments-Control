@@ -1,4 +1,4 @@
-package austeretony.enchcontrol.common.commands;
+package austeretony.enchcontrol.common.command;
 
 public enum EnumCommandECArgs {
 

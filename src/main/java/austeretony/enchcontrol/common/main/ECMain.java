@@ -7,16 +7,18 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import austeretony.enchcontrol.common.commands.CommandEC;
+import austeretony.enchcontrol.client.event.ECClientEvents;
+import austeretony.enchcontrol.common.command.CommandEC;
 import austeretony.enchcontrol.common.config.ConfigLoader;
 import austeretony.enchcontrol.common.config.EnumConfigSettings;
-import austeretony.enchcontrol.common.enchantments.EnchantmentWrapper;
+import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
 import austeretony.enchcontrol.common.reference.CommonReference;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 import net.minecraftforge.fml.relauncher.Side;
 
@@ -31,7 +33,7 @@ public class ECMain {
     public static final String 
     MODID = "enchcontrol", 
     NAME = "Enchantments Control", 
-    VERSION = "1.1.0", 
+    VERSION = "1.1.1", 
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_forge.json",
@@ -51,6 +53,14 @@ public class ECMain {
     public void init(FMLInitializationEvent event) {
         if (EnumConfigSettings.CHECK_UPDATES.isEnabled())
             CommonReference.registerEvent(new UpdateChecker());
+        if (event.getSide() == Side.CLIENT) 
+            CommonReference.registerEvent(new ECClientEvents());
+    }
+
+    @EventHandler
+    public void postInit(FMLPostInitializationEvent event) {
+        this.collectModNames();
+        this.removeUnloadedModdedEnchantments();
     }
 
     @EventHandler
@@ -60,8 +70,6 @@ public class ECMain {
         CommonReference.registerCommand(event, new CommandEC());
         if (EnumConfigSettings.CHECK_UPDATES.isEnabled())
             new Thread(new UpdateChecker(), "Enchantments Control Update Check").start();  
-        this.collectModNames();
-        this.removeUnloadedModdedEnchantments();
     }
 
     private void collectModNames() {

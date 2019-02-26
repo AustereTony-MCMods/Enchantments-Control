@@ -29,7 +29,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import austeretony.enchcontrol.common.enchantments.EnchantmentWrapper;
+import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
 import austeretony.enchcontrol.common.main.ECMain;
 import austeretony.enchcontrol.common.main.UpdateChecker;
 import austeretony.enchcontrol.common.reference.CommonReference;
@@ -237,24 +237,22 @@ public class ConfigLoader {
     }
 
     public static void loadCustomLocalization(List<String> languageList, Map<String, String> properties) {
-        if (EnumConfigSettings.CUSTOM_LOCALIZATION.isEnabled()) {
-            Path localizationPath = Paths.get(EXT_LOCALIZATION_FILE);      
-            if (Files.exists(localizationPath)) {
-                try {       
-                    loadLocalization(ECUtils.getExternalJsonData(EXT_LOCALIZATION_FILE).getAsJsonObject(), languageList, properties);
-                } catch (IOException exception) {       
-                    exception.printStackTrace();
-                    return;
-                }
-            } else {
-                try {               
-                    Files.createDirectories(localizationPath.getParent());
-                    ECUtils.createAbsoluteJsonCopy(EXT_LOCALIZATION_FILE, ConfigLoader.class.getClassLoader().getResourceAsStream("assets/enchcontrol/localization.json"));    
-                    loadLocalization(ECUtils.getInternalJsonData("assets/enchcontrol/localization.json").getAsJsonObject(), languageList, properties);
-                } catch (IOException exception) {               
-                    exception.printStackTrace();
-                }   
+        Path localizationPath = Paths.get(EXT_LOCALIZATION_FILE);      
+        if (Files.exists(localizationPath)) {
+            try {       
+                loadLocalization(ECUtils.getExternalJsonData(EXT_LOCALIZATION_FILE).getAsJsonObject(), languageList, properties);
+            } catch (IOException exception) {       
+                exception.printStackTrace();
+                return;
             }
+        } else {
+            try {               
+                Files.createDirectories(localizationPath.getParent());
+                ECUtils.createAbsoluteJsonCopy(EXT_LOCALIZATION_FILE, ConfigLoader.class.getClassLoader().getResourceAsStream("assets/enchcontrol/localization.json"));    
+                loadLocalization(ECUtils.getInternalJsonData("assets/enchcontrol/localization.json").getAsJsonObject(), languageList, properties);
+            } catch (IOException exception) {               
+                exception.printStackTrace();
+            }   
         }
     }
 

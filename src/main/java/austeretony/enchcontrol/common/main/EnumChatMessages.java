@@ -6,8 +6,8 @@ import java.util.TreeSet;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import austeretony.enchcontrol.common.commands.EnumCommandECArgs;
-import austeretony.enchcontrol.common.enchantments.EnchantmentWrapper;
+import austeretony.enchcontrol.common.command.EnumCommandECArgs;
+import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
 import austeretony.enchcontrol.common.reference.CommonReference;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.EntityPlayer;

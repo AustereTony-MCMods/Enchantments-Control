@@ -1,5 +1,6 @@
 package austeretony.enchcontrol.common.core;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -9,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 
 import austeretony.enchcontrol.common.config.ConfigLoader;
-import austeretony.enchcontrol.common.enchantments.EnchantmentWrapper;
+import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandEnchant;
@@ -61,6 +62,15 @@ public class ECHooks {
         if (wrapper.isCurse())
             s = TextFormatting.RED + s;
         return level == 1 && wrapper.getMaxLevel() == 1 ? s : s + " " + I18n.format("enchantment.level." + level);
+    }
+
+    //Hook to <EnchantmentHelper> class to <removeIncompatible()> method (replaces whole method).
+    public static void removeIncompatible(List<EnchantmentData> list, EnchantmentData enchantmentData) {
+        Iterator<EnchantmentData> iterator = list.iterator();
+        while (iterator.hasNext()) {
+            if (!EnchantmentWrapper.get(enchantmentData.enchantment).isCompatibleWith((iterator.next()).enchantment))
+                iterator.remove();
+        }
     }
 
     //Hook to <EnchantmentHelper> class to <getEnchantmentDatas()> method (replaces whole method).
@@ -186,5 +196,12 @@ public class ECHooks {
                 if (tab.hasRelevantEnchantmentType(enchantment1.type))
                     items.add(ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment1, EnchantmentWrapper.get(enchantment1).getMaxLevel())));
         }
+    }
+    
+    //Hook to <EnchanterManager> class to <addDefaultEnchantmentRecipe()> method (validate enchantment).
+    public static boolean isInvalid(Enchantment enchantment) {
+        if (enchantment == null)
+            return true;
+        return !EnchantmentWrapper.get(enchantment).isEnabled();
     }
 }

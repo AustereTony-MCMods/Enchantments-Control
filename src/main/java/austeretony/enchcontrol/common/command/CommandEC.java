@@ -1,4 +1,4 @@
-package austeretony.enchcontrol.common.commands;
+package austeretony.enchcontrol.common.command;
 
 import java.math.BigDecimal;
 
@@ -7,7 +7,7 @@ import com.udojava.evalex.Expression;
 import austeretony.enchcontrol.common.config.ConfigLoader;
 import austeretony.enchcontrol.common.config.EnumConfigSettings;
 import austeretony.enchcontrol.common.config.EnumEnchantmentListType;
-import austeretony.enchcontrol.common.enchantments.EnchantmentWrapper;
+import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
 import austeretony.enchcontrol.common.main.ECMain;
 import austeretony.enchcontrol.common.main.EnumChatMessages;
 import austeretony.enchcontrol.common.reference.CommonReference;
