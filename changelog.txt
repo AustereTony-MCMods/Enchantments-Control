@@ -1,3 +1,11 @@
+1.1.2b
++Improved "/ec list-all" and "/ec list-unknown" commands. Added arguments "-r" (shown registry name for 
+each enchantment) and "-nr" (don't show registry names). 
++Improved "/ec file-unknown" command, now it will also collect enchantments registry names.
++Fixes:
+ - Fixed enchantment type initialization. Now it will properly collect and apply custom (non-vanilla) types 
+ from config (solution for issue #4).
+
 1.1.1b
 +Added ability to set descriptions for enchantments. Descriptions will be shown for enchanted 
 items and books. Tooltips can be disabled and configured.

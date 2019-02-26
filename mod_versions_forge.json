@@ -1,10 +1,10 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/enchantments-control",
   "1.12.2": {
-    "1.1.1": "Ability to set descriptions. Fixed empty gungeon chests."
+    "1.1.2": "Fixed type initialization. Improvements for EC chat command."
   },
   "promos": {
-    "1.12.2-latest": "1.1.1",
-    "1.12.2-recommended": "1.1.1"
+    "1.12.2-latest": "1.1.2",
+    "1.12.2-recommended": "1.1.2"
   }
 }
