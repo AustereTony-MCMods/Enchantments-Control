@@ -38,6 +38,7 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.Loader;
 
 public class ConfigLoader {
 
@@ -55,6 +56,8 @@ public class ConfigLoader {
     public static boolean runningAtDedicatedServer;
 
     private static final DateFormat BACKUP_DATE_FORMAT = new SimpleDateFormat("yy_MM_dd-HH-mm-ss");
+
+    private static Map<String, String> localization;
 
     public static void load() {
         ECMain.LOGGER.info("Loading configuration...");
@@ -169,7 +172,7 @@ public class ConfigLoader {
             try {
                 rarity = Enchantment.Rarity.valueOf(rarityStr);
             } catch(IllegalArgumentException exception) {
-                ECMain.LOGGER.error("Unknown enchantment rarity: <{}>! Default type <COMMON> will be used.", rarityStr);
+                ECMain.LOGGER.error("Unknown enchantment rarity: <{}>! Default value <COMMON> will be used.", rarityStr);
                 rarity = Enchantment.Rarity.COMMON;
             }
             wrapper = EnchantmentWrapper.create(
@@ -227,22 +230,25 @@ public class ConfigLoader {
     }
 
     public static void loadCustomLocalization(List<String> languageList, Map<String, String> properties) {
-        Path localizationPath = Paths.get(EXT_LOCALIZATION_FILE);      
-        if (Files.exists(localizationPath)) {
-            try {       
-                loadLocalization(ECUtils.getExternalJsonData(EXT_LOCALIZATION_FILE).getAsJsonObject(), languageList, properties);
-            } catch (IOException exception) {       
-                exception.printStackTrace();
-                return;
+        localization = properties;
+        if (EnumConfigSettings.CUSTOM_LOCALIZATION.isEnabled()) {
+            Path localizationPath = Paths.get(EXT_LOCALIZATION_FILE);      
+            if (Files.exists(localizationPath)) {
+                try {       
+                    loadLocalization(ECUtils.getExternalJsonData(EXT_LOCALIZATION_FILE).getAsJsonObject(), languageList, properties);
+                } catch (IOException exception) {       
+                    exception.printStackTrace();
+                    return;
+                }
+            } else {
+                try {               
+                    Files.createDirectories(localizationPath.getParent());
+                    ECUtils.createAbsoluteJsonCopy(EXT_LOCALIZATION_FILE, ConfigLoader.class.getClassLoader().getResourceAsStream("assets/enchcontrol/localization.json"));    
+                    loadLocalization(ECUtils.getInternalJsonData("assets/enchcontrol/localization.json").getAsJsonObject(), languageList, properties);
+                } catch (IOException exception) {               
+                    exception.printStackTrace();
+                }   
             }
-        } else {
-            try {               
-                Files.createDirectories(localizationPath.getParent());
-                ECUtils.createAbsoluteJsonCopy(EXT_LOCALIZATION_FILE, ConfigLoader.class.getClassLoader().getResourceAsStream("assets/enchcontrol/localization.json"));    
-                loadLocalization(ECUtils.getInternalJsonData("assets/enchcontrol/localization.json").getAsJsonObject(), languageList, properties);
-            } catch (IOException exception) {               
-                exception.printStackTrace();
-            }   
         }
     }
 
@@ -263,6 +269,30 @@ public class ConfigLoader {
                 }
             } else {
                 ECMain.LOGGER.error("Custom localization for <{}> undefined!", lang);
+            }
+        }
+    }
+
+    public static void processEnchantmentDescriptionsSupport() {
+        boolean 
+        edLoaded = Loader.isModLoaded("enchdesc"),
+        useDesc = EnumConfigSettings.TOOLTIPS.isEnabled() && EnumConfigSettings.USE_ED_DESCRIPTION.isEnabled(),
+        addDesc = !EnumConfigSettings.TOOLTIPS.isEnabled() && EnumConfigSettings.LOAD_DESCRIPTION_TO_ED.isEnabled();
+        if (useDesc || addDesc) {
+            String formattedKey, 
+            description = "";
+            for (EnchantmentWrapper wrapper : EnchantmentWrapper.getWrappers()) {
+                formattedKey =  "enchantment." + wrapper.modid + "." + wrapper.resourceName + ".desc";
+                if (useDesc && !wrapper.hasDescription() && (description = localization.get(formattedKey)) != null) {
+                    wrapper.initDescription(1);
+                    wrapper.getDescription()[0] = description;
+                    wrapper.setTemporaryDescription();
+                }
+                if (addDesc && edLoaded && wrapper.hasDescription() && !localization.containsKey(formattedKey)) {
+                    for (String line : wrapper.getDescription())
+                        description += I18n.format(line) + " ";
+                    localization.put(formattedKey, description);
+                }
             }
         }
     }
@@ -327,7 +357,7 @@ public class ConfigLoader {
                 for (ResourceLocation regName : wrapper.getItemList())
                     itemsArray.add(new JsonPrimitive(regName.toString()));
             enchObject.add(EnumEnchantmentsKeys.ITEMS_LIST.key, itemsArray);
-            if (wrapper.hasDescription())
+            if (wrapper.hasDescription() && !wrapper.isTemporaryDescription())
                 for (String line : wrapper.getDescription())
                     descArray.add(new JsonPrimitive(line));
             enchObject.add(EnumEnchantmentsKeys.DESCRIPTION.key, descArray);

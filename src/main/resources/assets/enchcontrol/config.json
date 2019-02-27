@@ -5,6 +5,14 @@
    "custom_update_checker": false,
    "enable_custom_localization": false
   },
+  "tweaks": {
+    "roman_numerals": true,
+    "enchantment_table_level_cap": 10,
+    "anvil_level_cap": 10,
+    "merchant_deals_level_cap": 10,
+    "dungeon_loot_level_cap": 10,
+    "creative_tab_level_cap": 10
+  },
   "tooltips": {
     "enabled": true,
     "show_splitter": true,
@@ -13,6 +21,8 @@
     "show_domain": true
   },
   "mod_support": {
+    "use_ed_description": true,
+    "load_description_to_ed": false,
     "thermal_expansion": true
   }
 }

@@ -33,7 +33,7 @@ public class ECMain {
     public static final String 
     MODID = "enchcontrol", 
     NAME = "Enchantments Control", 
-    VERSION = "1.1.2", 
+    VERSION = "1.1.3", 
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_forge.json",
@@ -61,6 +61,8 @@ public class ECMain {
     public void postInit(FMLPostInitializationEvent event) {
         this.collectModNames();
         this.removeUnloadedModdedEnchantments();
+        if (event.getSide() == Side.CLIENT) 
+            ConfigLoader.processEnchantmentDescriptionsSupport();
     }
 
     @EventHandler

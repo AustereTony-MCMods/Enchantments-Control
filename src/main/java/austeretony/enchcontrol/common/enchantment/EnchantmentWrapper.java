@@ -26,9 +26,9 @@ public class EnchantmentWrapper {
 
     public final ResourceLocation registryName;
 
-    public final String modid;
+    public final String modid, resourceName;
 
-    private boolean enabled, initialized, customEvals, isTreasure, doublePrice, isCurse, isAllowedOnBooks, hasIncompat, hasItemsList, hasDesc;
+    private boolean enabled, initialized, customEvals, isTreasure, doublePrice, isCurse, isAllowedOnBooks, hasIncompat, hasItemsList, hasDesc, temporaryDesc;
 
     private String name, minEnchEval, maxEnchEval, typeStr;
 
@@ -54,6 +54,7 @@ public class EnchantmentWrapper {
     private EnchantmentWrapper(ResourceLocation registryName) {
         this.registryName = registryName;
         this.modid = registryName.getResourceDomain();
+        this.resourceName = registryName.getResourcePath();
         WRAPPERS.put(registryName, this);
     }
 
@@ -386,5 +387,13 @@ public class EnchantmentWrapper {
 
     public String[] getDescription() {
         return  this.description;
+    }
+    
+    public boolean isTemporaryDescription() {
+        return this.temporaryDesc;
+    }
+    
+    public void setTemporaryDescription() {
+        this.temporaryDesc = true;
     }
 }

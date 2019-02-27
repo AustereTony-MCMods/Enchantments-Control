@@ -45,7 +45,7 @@ public enum EnumInputClasses {
     public boolean patch(ClassNode classNode) {
         switch (this) {
         case MC_LOCALE:
-            return EnumConfigSettings.CUSTOM_LOCALIZATION.isEnabled() && this.pathcMCLocale(classNode);
+            return this.pathcMCLocale(classNode);
         case MC_ENCHANTMENT:
             return this.pathcMCEnchantment(classNode);
         case MC_ENCHANTMENT_HELPER:

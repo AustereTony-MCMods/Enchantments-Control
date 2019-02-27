@@ -10,7 +10,9 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Lists;
 
 import austeretony.enchcontrol.common.config.ConfigLoader;
+import austeretony.enchcontrol.common.config.EnumConfigSettings;
 import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
+import austeretony.enchcontrol.common.util.ECUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandEnchant;
@@ -42,7 +44,8 @@ public class ECHooks {
     //Hook to <ContainerRepair> class to <updateRepairOutput()> method (overwrites <int j2> variable).
     public static int ceilMaxLevel(Enchantment enchantment, int level) {
         EnchantmentWrapper wrapper = EnchantmentWrapper.get(enchantment);
-        return level > wrapper.getMaxLevel() ? wrapper.getMaxLevel() : level;
+        int levelCap = MathHelper.clamp(wrapper.getMaxLevel(), wrapper.getMinLevel(), EnumConfigSettings.ANVIL_LEVEL_CAP.getIntValue());
+        return level > levelCap ? levelCap : level;
     }
 
     //Hook to <ContainerRepair> class to <updateRepairOutput()> method (overwrites <boolean flag1> variable).
@@ -61,7 +64,7 @@ public class ECHooks {
         String s = I18n.format(wrapper.getName());
         if (wrapper.isCurse())
             s = TextFormatting.RED + s;
-        return level == 1 && wrapper.getMaxLevel() == 1 ? s : s + " " + I18n.format("enchantment.level." + level);
+        return level == 1 && wrapper.getMaxLevel() == 1 ? s : s + " " + (EnumConfigSettings.ROMAN_NUMERALS.isEnabled() ? ECUtils.toRomanNumeral(level) : level);
     }
 
     //Hook to <EnchantmentHelper> class to <removeIncompatible()> method (replaces whole method).
@@ -79,11 +82,13 @@ public class ECHooks {
         Item item = itemStack.getItem();
         boolean flag = itemStack.getItem() == Items.BOOK;
         EnchantmentWrapper wrapper;
+        int levelCap;
         for (Enchantment enchantment : Enchantment.REGISTRY) {
             wrapper = EnchantmentWrapper.get(enchantment);
             if (wrapper.isEnabled()) {
                 if ((!wrapper.isTreasure() || allowTreasure) && (enchantment.canApplyAtEnchantingTable(itemStack) || (flag && wrapper.isAllowedOnBooks()))) {
-                    for (int i = wrapper.getMaxLevel(); i > wrapper.getMinLevel() - 1; --i) {
+                    levelCap = MathHelper.clamp(wrapper.getMaxLevel(), wrapper.getMinLevel(), EnumConfigSettings.ENCHANTMENT_TABLE_LEVEL_CAP.getIntValue());
+                    for (int i = levelCap; i > wrapper.getMinLevel() - 1; --i) {
                         if (level >= wrapper.getMinEnchantability(i) && level <= wrapper.getMaxEnchantability(i)) {
                             list.add(new EnchantmentData(enchantment, i));
                             break;
@@ -109,7 +114,9 @@ public class ECHooks {
     public static void addMerchantRecipe(MerchantRecipeList recipeList, Random random) {
         Enchantment enchantment = getRandomEnchantment(random);
         EnchantmentWrapper wrapper = EnchantmentWrapper.get(enchantment);
-        int i = MathHelper.getInt(random, wrapper.getMinLevel(), wrapper.getMaxLevel());
+        int 
+        levelCap = MathHelper.clamp(wrapper.getMaxLevel(), wrapper.getMinLevel(), EnumConfigSettings.MERCHANT_DEALS_LEVEL_CAP.getIntValue()),
+        i = MathHelper.getInt(random, wrapper.getMinLevel(), levelCap);
         ItemStack itemstack = ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment, i));
         int j = 2 + random.nextInt(5 + i * 10) + 3 * i;
         if (wrapper.shouldDoublePrice())
@@ -140,7 +147,9 @@ public class ECHooks {
             enchantment = enchantments.get(rand.nextInt(enchantments.size()));
         }
         wrapper = EnchantmentWrapper.get(enchantment);
-        int i = MathHelper.getInt(rand, wrapper.getMinLevel(), wrapper.getMaxLevel());
+        int 
+        levelCap = MathHelper.clamp(wrapper.getMaxLevel(), wrapper.getMinLevel(), EnumConfigSettings.DUNGEON_LOOT_LEVEL_CAP.getIntValue()),
+        i = MathHelper.getInt(rand, wrapper.getMinLevel(), levelCap);
         if (itemStack.getItem() == Items.BOOK) {
             itemStack = new ItemStack(Items.ENCHANTED_BOOK);
             ItemEnchantedBook.addEnchantment(itemStack, new EnchantmentData(enchantment, i));
@@ -185,10 +194,12 @@ public class ECHooks {
     public static void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
         if (tab == CreativeTabs.SEARCH) {
             EnchantmentWrapper wrapper;
+            int levelCap;
             for (Enchantment enchantment : Enchantment.REGISTRY) {
                 wrapper = EnchantmentWrapper.get(enchantment);
+                levelCap = MathHelper.clamp(wrapper.getMaxLevel(), wrapper.getMinLevel(), EnumConfigSettings.CREATIVE_TAB_LEVEL_CAP.getIntValue());
                 if (enchantment.type != null)
-                    for (int i = wrapper.getMinLevel(); i <= wrapper.getMaxLevel(); ++i)
+                    for (int i = wrapper.getMinLevel(); i <= levelCap; ++i)
                         items.add(ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment, i)));
             }
         } else if (tab.getRelevantEnchantmentTypes().length != 0) {
@@ -197,7 +208,7 @@ public class ECHooks {
                     items.add(ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment1, EnchantmentWrapper.get(enchantment1).getMaxLevel())));
         }
     }
-    
+
     //Hook to <EnchanterManager> class to <addDefaultEnchantmentRecipe()> method (validate enchantment).
     public static boolean isInvalid(Enchantment enchantment) {
         if (enchantment == null)
