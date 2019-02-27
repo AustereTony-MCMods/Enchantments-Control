@@ -1,3 +1,20 @@
+1.1.3b
++Improved enchantment levels display, added automatic conversion to roman numerals - now 
+it capable to display any value properly. Roman numerals can be disabled in favor of standard numbers via config.
++Added enchantment level cap settings for:
+ - enchantment table
+ - anvil
+ - merchant deals
+ - dungeon loot
+ - overall creative tab
+This settings can be used to prevent insane enchantment levels appearing if level range was significantly increased 
+(this means if you have <Sharpness> maximum level increased to 50, you will not find such level in dungeon loot, 
+or will not get 50 books in overall creative tab and etc. - it will be capped by settings). All caps by default 
+set to 10. Note: "/enchant" command will not be capped.
++Added support for Enchantment Descriptions. Enchantments Control will use enchantment description from any mod, which provides 
+ED descriptions (only if EC config doesn't contain description for enchantment). Also if EC config contains descriptions for some 
+enchantments it will be used by ED (only if there is no description, provided for ED). 
+
 1.1.2b
 +Improved "/ec list-all" and "/ec list-unknown" commands. Added arguments "-r" (shown registry name for 
 each enchantment) and "-nr" (don't show registry names). 
