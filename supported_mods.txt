@@ -1,11 +1,11 @@
 Enchantment Descriptions
 ========================
-1. Enchantments Control can use descriptions provided for ED.
+1. Enchantments Control can use descriptions provided for Enchantment Descriptions Mod.
  - Enchantments Control will use enchantment description from any mod, which provides 
- ED descriptions (only if EC config doesn't contain description for enchantment).
-2. ED can use descriptions provided by EC.
- - If EC config contains descriptions for some enchantments it will be used by 
- ED (only if there is no description, provided for ED). 
+ Enchantment Descriptions Mod descriptions (only if Enchantments Control config doesn't contain description for enchantment).
+2. Enchantment Descriptions Mod can use descriptions provided by Enchantments Control.
+ - If Enchantments Control config contains descriptions for some enchantments it will be used by 
+ Enchantment Descriptions Mod (only if there is no description, provided for Enchantment Descriptions Mod). 
  
 Thermal Expansion
 =================

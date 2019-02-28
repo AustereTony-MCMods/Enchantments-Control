@@ -1,3 +1,18 @@
+1.1.4b
++Added ability to hide curses on items and books.
++Added ability to hide any enchantmnet on items or books.
++Improved enchantment descriptions. Added new parameters to config: "show hint" - disable or enable hint 
+about key to press to display descriptions, "location" - control location of descriptions: after enchantment 
+names or show it in the end of tooltip, "separator" - ability to setup custom separator line or disable it.
++Renaimed some parameters.
++Improved enchantments rarity and applicable equipment slots initialization. They will use their own base 
+parameters if defined types can not be parsed.
++Fixes:
+ - Fixed broken translation of uploading enchantment descriptions to Enchantment Descriptions Mod.
+ - Optimized loading enchantment descriptions from Enchantment Descriptions Mod.
+ - Fixed enchantment decriptions display in tooltips.
+///Important! Configs has been changed and are not compatible with previous versions! Backup data and remove old configs!
+
 1.1.3b
 +Improved enchantment levels display, added automatic conversion to roman numerals - now 
 it capable to display any value properly. Roman numerals can be disabled in favor of standard numbers via config.
