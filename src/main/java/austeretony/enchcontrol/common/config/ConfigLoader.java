@@ -35,7 +35,6 @@ import austeretony.enchcontrol.common.main.UpdateChecker;
 import austeretony.enchcontrol.common.reference.CommonReference;
 import austeretony.enchcontrol.common.util.ECUtils;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Loader;
@@ -160,30 +159,26 @@ public class ConfigLoader {
         ECMain.LOGGER.info("Loading data...");
         EnumConfigSettings.initAll(configFile);
         JsonObject enchObject;
-        JsonArray descArray;
+        JsonArray slotsArray, descArray;
         EnchantmentWrapper wrapper;
-        String rarityStr;
-        Enchantment.Rarity rarity;
         EntityEquipmentSlot[] equipmentSlots;
         int i = 0;
         for (JsonElement enchElement : settingsFile) {
             enchObject = enchElement.getAsJsonObject();
-            rarityStr = enchObject.get(EnumEnchantmentsKeys.RARITY.key).getAsString();
-            try {
-                rarity = Enchantment.Rarity.valueOf(rarityStr);
-            } catch(IllegalArgumentException exception) {
-                ECMain.LOGGER.error("Unknown enchantment rarity: <{}>! Default value <COMMON> will be used.", rarityStr);
-                rarity = Enchantment.Rarity.COMMON;
-            }
             wrapper = EnchantmentWrapper.create(
                     new ResourceLocation(enchObject.get(EnumEnchantmentsKeys.ID.key).getAsString()), 
                     enchObject.get(EnumEnchantmentsKeys.ENABLED.key).getAsBoolean(),
                     enchObject.get(EnumEnchantmentsKeys.UNLOCALIZED_NAME.key).getAsString(),
-                    rarity == null ? Enchantment.Rarity.COMMON : rarity,
-                            enchObject.get(EnumEnchantmentsKeys.MIN_LEVEL.key).getAsInt(),
-                            enchObject.get(EnumEnchantmentsKeys.MAX_LEVEL.key).getAsInt(),
-                            null,//Due to ability for modders to add custom EnumEnchantmentType values it is early to init it here, so enchantment type init moved to wrapper getter (where actual enchantment wrapping performed).
-                            getSlots(enchObject.get(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key).getAsJsonArray()));
+                    enchObject.get(EnumEnchantmentsKeys.MIN_LEVEL.key).getAsInt(),
+                    enchObject.get(EnumEnchantmentsKeys.MAX_LEVEL.key).getAsInt());
+            wrapper.setHideOnItem(enchObject.get(EnumEnchantmentsKeys.HIDE_ON_ITEM.key).getAsBoolean());
+            wrapper.setHideOnBook(enchObject.get(EnumEnchantmentsKeys.HIDE_ON_BOOK.key).getAsBoolean());
+            slotsArray = enchObject.get(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key).getAsJsonArray();
+            wrapper.initEnumEquipmentSlotsStrings(slotsArray.size());
+            i = 0;
+            for (JsonElement e : slotsArray)
+                wrapper.getEnumEquipmentSlotsStrings()[i++] = e.getAsString();
+            wrapper.setEnumRarityString(enchObject.get(EnumEnchantmentsKeys.RARITY.key).getAsString());
             wrapper.setEnumTypeString(enchObject.get(EnumEnchantmentsKeys.TYPE.key).getAsString());
             wrapper.setTreasure(enchObject.get(EnumEnchantmentsKeys.TREASURE.key).getAsBoolean());
             wrapper.setDoublePrice(enchObject.get(EnumEnchantmentsKeys.DOUBLE_PRICE.key).getAsBoolean());
@@ -206,27 +201,6 @@ public class ConfigLoader {
                     wrapper.getDescription()[i++] = lineElement.getAsString();
             }
         }
-    }
-
-    private static EntityEquipmentSlot[] getSlots(JsonArray jsonArray) {
-        if (jsonArray.size() == 0) 
-            return EntityEquipmentSlot.values();   
-        EntityEquipmentSlot[] slots = new EntityEquipmentSlot[jsonArray.size()];
-        String slotName;
-        int i = 0;
-        EntityEquipmentSlot slot; 
-        for (JsonElement slotElement : jsonArray) {
-            slotName = slotElement.getAsString();
-            if (slotName.equals("ALL")) 
-                return EntityEquipmentSlot.values();  
-            slot = EntityEquipmentSlot.valueOf(slotName);
-            if (slot != null)
-                slots[i] = slot;
-            else   
-                slots[i] = EntityEquipmentSlot.MAINHAND;
-            i++;
-        }
-        return slots;
     }
 
     public static void loadCustomLocalization(List<String> languageList, Map<String, String> properties) {
@@ -276,23 +250,19 @@ public class ConfigLoader {
     public static void processEnchantmentDescriptionsSupport() {
         boolean 
         edLoaded = Loader.isModLoaded("enchdesc"),
-        useDesc = EnumConfigSettings.TOOLTIPS.isEnabled() && EnumConfigSettings.USE_ED_DESCRIPTION.isEnabled(),
-        addDesc = !EnumConfigSettings.TOOLTIPS.isEnabled() && EnumConfigSettings.LOAD_DESCRIPTION_TO_ED.isEnabled();
-        if (useDesc || addDesc) {
-            String formattedKey, 
-            description = "";
+        loadDesc = EnumConfigSettings.DESCRIPTIONS.isEnabled() && EnumConfigSettings.LOAD_ED_DESC.isEnabled(),
+        uploadDesc = !EnumConfigSettings.DESCRIPTIONS.isEnabled() && EnumConfigSettings.UPLOAD_DESC_TO_ED.isEnabled();
+        if (loadDesc || uploadDesc) {
+            String formattedKey;
             for (EnchantmentWrapper wrapper : EnchantmentWrapper.getWrappers()) {
                 formattedKey =  "enchantment." + wrapper.modid + "." + wrapper.resourceName + ".desc";
-                if (useDesc && !wrapper.hasDescription() && (description = localization.get(formattedKey)) != null) {
+                if (loadDesc && !wrapper.hasDescription() && localization.containsKey(formattedKey)) {
                     wrapper.initDescription(1);
-                    wrapper.getDescription()[0] = description;
+                    wrapper.getDescription()[0] = formattedKey;
                     wrapper.setTemporaryDescription();
                 }
-                if (addDesc && edLoaded && wrapper.hasDescription() && !localization.containsKey(formattedKey)) {
-                    for (String line : wrapper.getDescription())
-                        description += I18n.format(line) + " ";
-                    localization.put(formattedKey, description);
-                }
+                if (uploadDesc && edLoaded && wrapper.hasDescription() && !localization.containsKey(formattedKey))
+                    localization.put(formattedKey, I18n.format(wrapper.getDescription()[0]));
             }
         }
     }
@@ -309,7 +279,7 @@ public class ConfigLoader {
         try {
             ECUtils.createExternalJsonFile(
                     CommonReference.getGameFolder() + "/config/enchcontrol/enchantments-" + BACKUP_DATE_FORMAT.format(new Date()) + ".json", 
-                    EnumConfigSettings.EXTERNAL_CONFIG.isEnabled() ? ECUtils.getExternalJsonData(EXT_DATA_FILE) : ECUtils.getInternalJsonData("assets/enchcontrol/enchantments.json"));         
+                    ECUtils.getExternalJsonData(EXT_DATA_FILE));         
         } catch (IOException exception) {
             exception.printStackTrace();
         }
@@ -332,6 +302,8 @@ public class ConfigLoader {
             enchObject.add(EnumEnchantmentsKeys.ID.key, new JsonPrimitive(wrapper.registryName.toString()));
             enchObject.add(EnumEnchantmentsKeys.UNLOCALIZED_NAME.key, new JsonPrimitive(wrapper.getName()));
             enchObject.add(EnumEnchantmentsKeys.ENABLED.key, new JsonPrimitive(wrapper.isEnabled()));
+            enchObject.add(EnumEnchantmentsKeys.HIDE_ON_ITEM.key, new JsonPrimitive(wrapper.shouldHideOnItem()));
+            enchObject.add(EnumEnchantmentsKeys.HIDE_ON_BOOK.key, new JsonPrimitive(wrapper.shouldHideOnBook()));
             enchObject.add(EnumEnchantmentsKeys.RARITY.key, new JsonPrimitive(wrapper.getRarity().toString()));
             enchObject.add(EnumEnchantmentsKeys.TREASURE.key, new JsonPrimitive(wrapper.isTreasure()));
             enchObject.add(EnumEnchantmentsKeys.DOUBLE_PRICE.key, new JsonPrimitive(wrapper.shouldDoublePrice()));

@@ -7,7 +7,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import austeretony.enchcontrol.client.event.ECClientEvents;
+import austeretony.enchcontrol.client.event.EnchantmentDescriptionRenderer;
 import austeretony.enchcontrol.common.command.CommandEC;
 import austeretony.enchcontrol.common.config.ConfigLoader;
 import austeretony.enchcontrol.common.config.EnumConfigSettings;
@@ -33,7 +33,7 @@ public class ECMain {
     public static final String 
     MODID = "enchcontrol", 
     NAME = "Enchantments Control", 
-    VERSION = "1.1.3", 
+    VERSION = "1.1.4", 
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_forge.json",
@@ -54,7 +54,7 @@ public class ECMain {
         if (EnumConfigSettings.CHECK_UPDATES.isEnabled())
             CommonReference.registerEvent(new UpdateChecker());
         if (event.getSide() == Side.CLIENT) 
-            CommonReference.registerEvent(new ECClientEvents());
+            CommonReference.registerEvent(new EnchantmentDescriptionRenderer());
     }
 
     @EventHandler

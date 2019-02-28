@@ -55,9 +55,10 @@ ec.command.err.wrongExpression=Неправильное выражение:
 ec.command.err.runningDedicatedServer=Нельзя использовать на выделенном сервере.
 ec.command.err.wrongArg=Неверный аргумент.
 
-ec.tooltip.holdKey=Удерживайте %s чтобы посмотреть описание.
+ec.tooltip.holdKey=Удерживайте %s чтобы посмотреть описание чар.
 ec.tooltip.noDesc=Нет описания
 ec.tooltip.addedBy=Добавлено
+ec.tooltip.cursed=Проклято
 
 ec.update.newVersion=Новая версия!
 ec.update.projectPage=Ссылка

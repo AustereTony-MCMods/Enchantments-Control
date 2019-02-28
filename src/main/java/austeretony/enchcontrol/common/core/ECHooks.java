@@ -8,10 +8,13 @@ import java.util.Random;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.Lists;
+import com.mojang.realmsclient.gui.ChatFormatting;
 
+import austeretony.enchcontrol.client.reference.ClientReference;
 import austeretony.enchcontrol.common.config.ConfigLoader;
 import austeretony.enchcontrol.common.config.EnumConfigSettings;
 import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
+import austeretony.enchcontrol.common.main.ECMain;
 import austeretony.enchcontrol.common.util.ECUtils;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.command.CommandBase;
@@ -27,6 +30,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
@@ -214,5 +218,54 @@ public class ECHooks {
         if (enchantment == null)
             return true;
         return !EnchantmentWrapper.get(enchantment).isEnabled();
+    }
+
+    //Hook to <ItemStack> class to <getTooltip()> method (replaces enchantment tooltip).
+    public static void modifyItemStackTooltip(int flag, ItemStack itemStack, List<String> tooltip, boolean enchantedBook) {
+        if ((flag & 1) == 0 || enchantedBook) {
+            NBTTagList tagList = enchantedBook ? ItemEnchantedBook.getEnchantments(itemStack) : itemStack.getEnchantmentTagList();
+            int k, l;
+            Enchantment enchantment;
+            EnchantmentWrapper wrapper;
+            for (int j = 0; j < tagList.tagCount(); ++j) {
+                NBTTagCompound nbttagcompound = tagList.getCompoundTagAt(j);
+                k = nbttagcompound.getShort("id");
+                l = nbttagcompound.getShort("lvl");
+                enchantment = Enchantment.getEnchantmentByID(k);
+                wrapper = EnchantmentWrapper.get(enchantment);
+                if (enchantment != null) {
+                    wrapper = EnchantmentWrapper.get(enchantment);
+                    boolean curseMarked = false;
+                    if (!(!enchantedBook && wrapper.shouldHideOnItem()) 
+                            && !(enchantedBook && wrapper.shouldHideOnBook())) { 
+                        if (!(wrapper.isCurse() && EnumConfigSettings.HIDE_CURSES.isEnabled())) {
+                            if (EnumConfigSettings.DESCRIPTIONS.isEnabled() 
+                                    && EnumConfigSettings.DESCRIPTIONS_LOCATION.getIntValue() == 0 
+                                    && ((!enchantedBook && EnumConfigSettings.DESCRIPTIONS_FOR_ITEMS.isEnabled()) || (enchantedBook && EnumConfigSettings.DESCRIPTIONS_FOR_BOOKS.isEnabled()))) {
+                                if (ClientReference.getGameSettings().isKeyDown(ClientReference.getGameSettings().keyBindSneak)) {
+                                    if (j > 0 && !EnumConfigSettings.DESCRIPTIONS_SEPARATOR.getStrValue().isEmpty())
+                                        tooltip.add(EnumConfigSettings.DESCRIPTIONS_SEPARATOR.getStrValue());
+                                    tooltip.add(enchantment.getTranslatedName(l));
+                                    if (wrapper.hasDescription()) {
+                                        for (String s : wrapper.getDescription()) 
+                                            tooltip.add(" " + ChatFormatting.ITALIC + I18n.format(s));
+                                    } else
+                                        tooltip.add(" " + ChatFormatting.ITALIC + I18n.format("ec.tooltip.noDesc"));
+                                    if (EnumConfigSettings.DESCRIPTIONS_SHOW_DOMAIN.isEnabled())
+                                        tooltip.add(" " + I18n.format("ec.tooltip.addedBy") + ": " + ChatFormatting.AQUA + ECMain.MODS_NAMES.get(wrapper.modid));
+                                } else
+                                    tooltip.add(enchantment.getTranslatedName(l));
+                            } else
+                                tooltip.add(enchantment.getTranslatedName(l));
+                        } else
+                            if (!curseMarked) {
+                                curseMarked = true;
+                                if (EnumConfigSettings.NOTIFY_CURSED.isEnabled())
+                                    tooltip.add(ChatFormatting.RED + I18n.format("ec.tooltip.cursed"));
+                            }
+                    }
+                }
+            }
+        }
     }
 }

@@ -8,23 +8,27 @@ public enum EnumConfigSettings {
     EXTERNAL_CONFIG(0, "main", "external_config", true),
     DEBUG_MODE(0, "main", "debug_mode"),
     CHECK_UPDATES(0, "main", "custom_update_checker"),
-    CUSTOM_LOCALIZATION(0, "main", "enable_custom_localization"),
+    CUSTOM_LOCALIZATION(0, "main", "custom_localization"),
+    HIDE_CURSES(0, "tweaks", "hide_curses"),
+    NOTIFY_CURSED(0, "tweaks", "notify_cursed"),
     ROMAN_NUMERALS(0, "tweaks", "roman_numerals"),
     ENCHANTMENT_TABLE_LEVEL_CAP(1, "tweaks", "enchantment_table_level_cap"),
     ANVIL_LEVEL_CAP(1, "tweaks", "anvil_level_cap"),
     MERCHANT_DEALS_LEVEL_CAP(1, "tweaks", "merchant_deals_level_cap"),
     DUNGEON_LOOT_LEVEL_CAP(1, "tweaks", "dungeon_loot_level_cap"),
     CREATIVE_TAB_LEVEL_CAP(1, "tweaks", "creative_tab_level_cap"),
-    TOOLTIPS(0, "tooltips", "enabled"),
-    TOOLTIPS_SHOW_SPLITTER(0, "tooltips", "show_splitter"),
-    TOOLTIPS_FOR_BOOKS(0, "tooltips", "allow_for_books"),
-    TOOLTIPS_FOR_ITEMS(0, "tooltips", "allow_for_items"),
-    TOOLTIPS_SHOW_DOMAIN(0, "tooltips", "show_domain"),
-    USE_ED_DESCRIPTION(0, "mod_support", "use_ed_description"),
-    LOAD_DESCRIPTION_TO_ED(0, "mod_support", "load_description_to_ed"),
+    DESCRIPTIONS(0, "description", "enabled"),
+    DESCRIPTIONS_HINT(0, "description", "show_hint"),
+    DESCRIPTIONS_LOCATION(1, "description", "location"),
+    DESCRIPTIONS_SEPARATOR(2, "description", "separator"),
+    DESCRIPTIONS_FOR_BOOKS(0, "description", "for_books"),
+    DESCRIPTIONS_FOR_ITEMS(0, "description", "for_items"),
+    DESCRIPTIONS_SHOW_DOMAIN(0, "description", "show_domain"),
+    LOAD_ED_DESC(0, "mod_support", "load_enchantment_descriptions_desc"),
+    UPLOAD_DESC_TO_ED(0, "mod_support", "upload_desc_to_enchantment_descriptions"),
     SUPPORT_THERMAL_EXPANSION(0, "mod_support", "thermal_expansion");
 
-    public final int type;//0 - boolean
+    public final int type;//0 - boolean, 1 - int, 2 - String
 
     public final String configSection, configKey;
 
@@ -33,6 +37,8 @@ public enum EnumConfigSettings {
     private boolean enabled;
 
     private int intValue;
+    
+    private String strValue;
 
     EnumConfigSettings(int type, String configSection, String configKey, boolean... exclude) {
         this.type = type;
@@ -48,6 +54,10 @@ public enum EnumConfigSettings {
     public int getIntValue() {
         return this.intValue;
     }
+    
+    public String getStrValue() {
+        return this.strValue;
+    }
 
     private JsonElement getValue(JsonObject jsonObject) {
         return jsonObject.get(this.configSection).getAsJsonObject().get(this.configKey);
@@ -60,6 +70,9 @@ public enum EnumConfigSettings {
             break;
         case 1:
             this.intValue = this.getValue(jsonObject).getAsInt();
+            break;
+        case 2:
+            this.strValue = this.getValue(jsonObject).getAsString();
             break;
         }
     }

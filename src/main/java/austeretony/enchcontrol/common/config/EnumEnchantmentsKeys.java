@@ -4,6 +4,8 @@ public enum EnumEnchantmentsKeys {
 
     ID("id"),
     ENABLED("enabled"),
+    HIDE_ON_ITEM("hide_on_item"),
+    HIDE_ON_BOOK("hide_on_book"),
     UNLOCALIZED_NAME("name"),
     RARITY("rarity"),
     TREASURE("treasure"),

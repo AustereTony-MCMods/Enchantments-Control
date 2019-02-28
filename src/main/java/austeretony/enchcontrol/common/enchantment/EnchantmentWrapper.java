@@ -28,9 +28,9 @@ public class EnchantmentWrapper {
 
     public final String modid, resourceName;
 
-    private boolean enabled, initialized, customEvals, isTreasure, doublePrice, isCurse, isAllowedOnBooks, hasIncompat, hasItemsList, hasDesc, temporaryDesc;
+    private boolean enabled, hideOnItem, hideOnBook, initialized, customEvals, isTreasure, doublePrice, isCurse, isAllowedOnBooks, hasIncompat, hasItemsList, hasDesc, temporaryDesc;
 
-    private String name, minEnchEval, maxEnchEval, typeStr;
+    private String name, minEnchEval, maxEnchEval, rarityStr, typeStr;
 
     private int[][] enchantability;//first column - MIN enchantability, second column - MAX enchantability
 
@@ -47,7 +47,7 @@ public class EnchantmentWrapper {
 
     private Set<ResourceLocation> incompatibleEnchants, itemsList;
 
-    private String[] description;
+    private String[] equipmentSlotsStrs, description;
 
     private Enchantment wrapped;
 
@@ -58,15 +58,12 @@ public class EnchantmentWrapper {
         WRAPPERS.put(registryName, this);
     }
 
-    public static EnchantmentWrapper create(ResourceLocation registryName, boolean isEnabled, String name, Enchantment.Rarity rarity, int minLevel, int maxLevel, EnumEnchantmentType type, EntityEquipmentSlot[] slots) {
+    public static EnchantmentWrapper create(ResourceLocation registryName, boolean isEnabled, String name, int minLevel, int maxLevel) {
         EnchantmentWrapper wrapper = new EnchantmentWrapper(registryName);
         wrapper.setEnabled(isEnabled);
         wrapper.setName(name);
-        wrapper.setRarity(rarity);
         wrapper.setMinLevel(minLevel);
         wrapper.setMaxLevel(maxLevel);
-        wrapper.setType(type);
-        wrapper.setEquipmentSlots(slots);
         return wrapper;
     }
 
@@ -82,11 +79,11 @@ public class EnchantmentWrapper {
                     registryName, 
                     true, 
                     enchantment.getName(),
-                    enchantment.rarity, 
-                    enchantment.getMinLevel(),
-                    enchantment.getMaxLevel(),
-                    enchantment.type, 
-                    enchantment.applicableEquipmentTypes);
+                    enchantment.getMinLevel(), 
+                    enchantment.getMaxLevel());
+            wrapper.setEquipmentSlots(enchantment.applicableEquipmentTypes);
+            wrapper.setRarity(enchantment.rarity);
+            wrapper.setType(enchantment.type);
             wrapper.initialized = true;
             wrapper.setMinEnchantabilityEvaluation(ConfigLoader.MIN_ENCH_DEFAULT_EVAL);
             wrapper.setMaxEnchantabilityEvaluation(ConfigLoader.MAX_ENCH_DEFAULT_EVAL);
@@ -104,23 +101,52 @@ public class EnchantmentWrapper {
                 wrapper.initialized = true;
                 if (!wrapper.isEnabled())
                     ECMain.LOGGER.info("Enchantment <{}> disabled! It can't be obtained in survival mode.", registryName);
-                enchantment.rarity = wrapper.getRarity();
+                wrapper.setEquipmentSlots(wrapper.initEquipmentSlots(wrapper.getEnumEquipmentSlotsStrings()));
+                Enchantment.Rarity rarity;
+                try {
+                    rarity = Enchantment.Rarity.valueOf(wrapper.getRarityString());
+                } catch(IllegalArgumentException exception) {
+                    ECMain.LOGGER.error("Unknown enchantment rarity: <{}>! Default value will be used: <{}>.", wrapper.getRarityString(), enchantment.rarity);
+                    rarity = enchantment.rarity;
+                }
+                wrapper.setRarity(rarity);
                 EnumEnchantmentType type;
                 try {
                     type = EnumEnchantmentType.valueOf(wrapper.getTypeString());
                 } catch(IllegalArgumentException exception) {
-                    ECMain.LOGGER.error("Unknown enchantment type: <{}>! Enchantment will be initialized with base type: <{}>.", wrapper.getTypeString(), enchantment.type == null ? "NULL" : enchantment.type.toString());
+                    ECMain.LOGGER.error("Unknown enchantment type: <{}>! Default value will be used: <{}>.", wrapper.getTypeString(), enchantment.type == null ? "NULL" : enchantment.type);
                     type = enchantment.type;
                 }
                 wrapper.setType(type);
-                enchantment.type = type;
                 enchantment.applicableEquipmentTypes = wrapper.getEquipmentSlots();
+                enchantment.rarity = wrapper.getRarity();
+                enchantment.type = wrapper.getType();
                 wrapper.setEnchantment(enchantment);
                 wrapper.calculateEnchantability();
                 ECMain.LOGGER.info("Initialized enchantment <{}> with config settings.", registryName);
             }
         }
         return wrapper;
+    }
+
+    public static  EntityEquipmentSlot[] initEquipmentSlots(String[] slotsStr) {
+        if (slotsStr.length == 0) 
+            return EntityEquipmentSlot.values();   
+        EntityEquipmentSlot[] slots = new EntityEquipmentSlot[slotsStr.length];
+        int i = 0;
+        EntityEquipmentSlot slot; 
+        for (String slotStr : slotsStr) {
+            if (slotStr.equals("ALL")) 
+                return EntityEquipmentSlot.values();  
+            try {            
+                slots[i] = EntityEquipmentSlot.valueOf(slotStr);
+            } catch(IllegalArgumentException exception) {
+                ECMain.LOGGER.error("Unknown enchantment equipment slot: <{}>! Default value <MAINHAND> will be used.", slotStr);
+                slots[i] = EntityEquipmentSlot.MAINHAND;            
+            }
+            i++;
+        }
+        return slots;
     }
 
     public static void clearData() {
@@ -142,6 +168,22 @@ public class EnchantmentWrapper {
 
     public void setEnabled(boolean flag) {
         this.enabled = flag;
+    }
+
+    public boolean shouldHideOnItem() {
+        return this.hideOnItem;
+    }
+
+    public void setHideOnItem(boolean flag) {
+        this.hideOnItem = flag;
+    }
+
+    public boolean shouldHideOnBook() {
+        return this.hideOnBook;
+    }
+
+    public void setHideOnBook(boolean flag) {
+        this.hideOnBook = flag;
     }
 
     public String getName() {
@@ -242,6 +284,22 @@ public class EnchantmentWrapper {
 
     public void setMaxLevel(int value) {
         this.maxLevel = value;
+    }
+
+    public void initEnumEquipmentSlotsStrings(int size) {
+        this.equipmentSlotsStrs = new String[size];
+    }
+
+    public String[] getEnumEquipmentSlotsStrings() {
+        return this.equipmentSlotsStrs;
+    }
+
+    public String getRarityString() {
+        return this.rarityStr;
+    }
+
+    public void setEnumRarityString(String typeStr) {
+        this.rarityStr = typeStr;
     }
 
     public String getTypeString() {
@@ -388,11 +446,11 @@ public class EnchantmentWrapper {
     public String[] getDescription() {
         return  this.description;
     }
-    
+
     public boolean isTemporaryDescription() {
         return this.temporaryDesc;
     }
-    
+
     public void setTemporaryDescription() {
         this.temporaryDesc = true;
     }

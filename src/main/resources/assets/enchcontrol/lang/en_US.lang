@@ -55,9 +55,10 @@ ec.command.err.wrongExpression=Wrong expression:
 ec.command.err.runningDedicatedServer=Can't be used at dedicated server.
 ec.command.err.wrongArg=Wrong argument.
 
-ec.tooltip.holdKey=Hold %s to see description.
+ec.tooltip.holdKey=Hold %s to see enchantments description.
 ec.tooltip.noDesc=No description
 ec.tooltip.addedBy=Added by
+ec.tooltip.cursed=Cursed
 
 ec.update.newVersion=New version!
 ec.update.projectPage=Link
