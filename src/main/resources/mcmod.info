@@ -1,0 +1,16 @@
+[
+{
+  "modid": "enchcontrol",
+  "name": "Enchantments Control",
+  "description": "Probably most advanced control over the enchantments.",
+  "version": "1.1.4",
+  "mcversion": "1.11.2",
+  "url": "https://minecraft.curseforge.com/projects/enchantments-control",
+  "updateUrl": "",
+  "authorList": ["AustereTony"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
