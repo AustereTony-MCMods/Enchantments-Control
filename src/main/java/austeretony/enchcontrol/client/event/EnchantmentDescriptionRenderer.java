@@ -12,6 +12,7 @@ import austeretony.enchcontrol.common.main.ECMain;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -57,7 +58,8 @@ public class EnchantmentDescriptionRenderer {
                         }
                     } else
                         if (EnumConfigSettings.DESCRIPTIONS_HINT.isEnabled()
-                                && ((enchantedBook && EnumConfigSettings.DESCRIPTIONS_FOR_BOOKS.isEnabled()) || (!enchantedBook && EnumConfigSettings.DESCRIPTIONS_FOR_ITEMS.isEnabled())))
+                                && ((enchantedBook && EnumConfigSettings.DESCRIPTIONS_FOR_BOOKS.isEnabled()) || (!enchantedBook && EnumConfigSettings.DESCRIPTIONS_FOR_ITEMS.isEnabled())) 
+                                && !ClientReference.getGameSettings().isKeyDown(ClientReference.getGameSettings().keyBindSneak))
                             tooltip.add(I18n.format("ec.tooltip.holdKey", ClientReference.getGameSettings().keyBindSneak.getDisplayName()));
                 }
             } else 
@@ -70,7 +72,7 @@ public class EnchantmentDescriptionRenderer {
 
     public static List<Enchantment> getEnchantments(ItemStack itemStack) {
         List<Enchantment> enchantments = new ArrayList<Enchantment>();
-        NBTTagList nbttaglist = itemStack.getItem() == Items.ENCHANTED_BOOK ? Items.ENCHANTED_BOOK.getEnchantments(itemStack) : itemStack.getEnchantmentTagList();
+        NBTTagList nbttaglist = itemStack.getItem() == Items.ENCHANTED_BOOK ? ItemEnchantedBook.getEnchantments(itemStack) : itemStack.getEnchantmentTagList();
         NBTTagCompound tagCompound;
         for (int i = 0; i < nbttaglist.tagCount(); ++i)
             enchantments.add(Enchantment.getEnchantmentByID(nbttaglist.getCompoundTagAt(i).getShort("id")));

@@ -14,6 +14,8 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import austeretony.enchcontrol.common.config.EnumConfigSettings;
+
 public enum EnumInputClasses {
 
     MC_LOCALE("Minecraft", "Locale", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
@@ -23,9 +25,10 @@ public enum EnumInputClasses {
     MC_ENCHANT_RANDOMLY("Minecraft", "EnchantRandomly", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_COMMAND_ENCHANT("Minecraft", "CommandEnchant", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_ITEM_ENCHANTED_BOOK("Minecraft", "ItemEnchantedBook", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
-    MC_CREATIVE_TABS("Minecraft", "CreativeTabs", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_CONTAINER_REPAIR("Minecraft", "ContainerRepair", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
-    MC_ITEM_STACK("Minecraft", "ItemStack", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+    MC_ITEM_STACK("Minecraft", "ItemStack", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
+
+    TE_ENCHANTER_MANAGER("Thermal Expansion", "EnchanterManager", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 
     private static final String HOOKS_CLASS = "austeretony/enchcontrol/common/core/ECHooks";
 
@@ -56,12 +59,13 @@ public enum EnumInputClasses {
             return this.pathcMCCommandEnchant(classNode);
         case MC_ITEM_ENCHANTED_BOOK:
             return this.pathcMCItemEnchantedBook(classNode);
-        case MC_CREATIVE_TABS:
-            return this.pathcMCCreativeTabs(classNode);
         case MC_CONTAINER_REPAIR:
             return this.pathcMCContainerRepair(classNode);
         case MC_ITEM_STACK:
             return this.pathcMCItemStack(classNode);
+
+        case TE_ENCHANTER_MANAGER:
+            return EnumConfigSettings.SUPPORT_THERMAL_EXPANSION.isEnabled() && this.pathcTEEnchanterManager(classNode);
         }
         return false;
     }
@@ -70,8 +74,8 @@ public enum EnumInputClasses {
         String
         propertiesFieldName = ECCorePlugin.isObfuscated() ? "a" : "properties",
                 loadLocaleDataFilesMethodName = ECCorePlugin.isObfuscated() ? "a" : "loadLocaleDataFiles",
-                        localeClassName = ECCorePlugin.isObfuscated() ? "cak" : "net/minecraft/client/resources/Locale",
-                                iResourceManagerClassName = ECCorePlugin.isObfuscated() ? "bzy" : "net/minecraft/client/resources/IResourceManager",
+                        localeClassName = ECCorePlugin.isObfuscated() ? "cfb" : "net/minecraft/client/resources/Locale",
+                                iResourceManagerClassName = ECCorePlugin.isObfuscated() ? "cep" : "net/minecraft/client/resources/IResourceManager",
                                         listClassName = "java/util/List",
                                         mapClassName = "java/util/Map";
         boolean isSuccessful = false;   
@@ -106,7 +110,7 @@ public enum EnumInputClasses {
     private boolean pathcMCEnchantment(ClassNode classNode) {
         String
         getTranslatedNameMethodName = ECCorePlugin.isObfuscated() ? "d" : "getTranslatedName",
-                enchantmentClassName = ECCorePlugin.isObfuscated() ? "aii" : "net/minecraft/enchantment/Enchantment",
+                enchantmentClassName = ECCorePlugin.isObfuscated() ? "alk" : "net/minecraft/enchantment/Enchantment",
                         stringClassName = "java/lang/String";
         boolean isSuccessful = false;   
         AbstractInsnNode currentInsn;
@@ -137,8 +141,8 @@ public enum EnumInputClasses {
         String
         removeIncompatibleMethodName = ECCorePlugin.isObfuscated() ? "a" : "removeIncompatible",
                 getEnchantmentDatasMethodName = ECCorePlugin.isObfuscated() ? "a" : "getEnchantmentDatas",
-                        enchantmentDataClassName = ECCorePlugin.isObfuscated() ? "ail" : "net/minecraft/enchantment/EnchantmentData",
-                                itemStackClassName = ECCorePlugin.isObfuscated() ? "afj" : "net/minecraft/item/ItemStack",
+                        enchantmentDataClassName = ECCorePlugin.isObfuscated() ? "aln" : "net/minecraft/enchantment/EnchantmentData",
+                                itemStackClassName = ECCorePlugin.isObfuscated() ? "aip" : "net/minecraft/item/ItemStack",
                                         listClassName = "java/util/List";
         boolean 
         isSuccessful0 = false,
@@ -186,8 +190,8 @@ public enum EnumInputClasses {
     private boolean pathcMCListEnchantedBookForEmeralds(ClassNode classNode) {
         String
         addMerchantRecipeMethodName = ECCorePlugin.isObfuscated() ? "a" : "addMerchantRecipe",
-                enchantmentClassName = ECCorePlugin.isObfuscated() ? "aii" : "net/minecraft/enchantment/Enchantment",
-                        merchantRecipeListClassName = ECCorePlugin.isObfuscated() ? "ajf" : "net/minecraft/village/MerchantRecipeList",
+                enchantmentClassName = ECCorePlugin.isObfuscated() ? "alk" : "net/minecraft/enchantment/Enchantment",
+                        merchantRecipeListClassName = ECCorePlugin.isObfuscated() ? "amh" : "net/minecraft/village/MerchantRecipeList",
                                 randomClassName = "java/util/Random";
         boolean isSuccessful = false;   
         AbstractInsnNode currentInsn;
@@ -219,8 +223,8 @@ public enum EnumInputClasses {
         enchantmentsFieldName = ECCorePlugin.isObfuscated() ? "b" : "enchantments",
                 loggerFieldName = ECCorePlugin.isObfuscated() ? "a" : "LOGGER",
                         applyMethodName = ECCorePlugin.isObfuscated() ? "a" : "apply",
-                                itemStackClassName = ECCorePlugin.isObfuscated() ? "afj" : "net/minecraft/item/ItemStack",
-                                        enchantRandomlyClassName = ECCorePlugin.isObfuscated() ? "bcp" : "net/minecraft/world/storage/loot/functions/EnchantRandomly",
+                                itemStackClassName = ECCorePlugin.isObfuscated() ? "aip" : "net/minecraft/item/ItemStack",
+                                        enchantRandomlyClassName = ECCorePlugin.isObfuscated() ? "bfx" : "net/minecraft/world/storage/loot/functions/EnchantRandomly",
                                                 randomClassName = "java/util/Random",
                                                 listClassName = "java/util/List",
                                                 loggerClassName = "org/apache/logging/log4j/Logger";
@@ -256,11 +260,11 @@ public enum EnumInputClasses {
         String
         executeMethodName = ECCorePlugin.isObfuscated() ? "a" : "execute",
                 minecraftServerClassName = "net/minecraft/server/MinecraftServer",
-                iCommandSenderClassName = ECCorePlugin.isObfuscated() ? "n" : "net/minecraft/command/ICommandSender",
-                        itemStackClassName = ECCorePlugin.isObfuscated() ? "afj" : "net/minecraft/item/ItemStack",
-                                enchantmentClassName = ECCorePlugin.isObfuscated() ? "aii" : "net/minecraft/enchantment/Enchantment",
-                                        entityLivingBaseClassName = ECCorePlugin.isObfuscated() ? "sw" : "net/minecraft/entity/EntityLivingBase",
-                                                commandEnchantClassName = ECCorePlugin.isObfuscated() ? "ac" : "net/minecraft/command/CommandEnchant",
+                iCommandSenderClassName = ECCorePlugin.isObfuscated() ? "bn" : "net/minecraft/command/ICommandSender",
+                        itemStackClassName = ECCorePlugin.isObfuscated() ? "aip" : "net/minecraft/item/ItemStack",
+                                enchantmentClassName = ECCorePlugin.isObfuscated() ? "alk" : "net/minecraft/enchantment/Enchantment",
+                                        entityLivingBaseClassName = ECCorePlugin.isObfuscated() ? "vp" : "net/minecraft/entity/EntityLivingBase",
+                                                commandEnchantClassName = ECCorePlugin.isObfuscated() ? "cd" : "net/minecraft/command/CommandEnchant",
                                                         stringClassName = "java/lang/String";
         boolean isSuccessful = false;   
         AbstractInsnNode currentInsn;
@@ -290,21 +294,24 @@ public enum EnumInputClasses {
         return isSuccessful;    
     }
 
+    //TODO
     private boolean pathcMCItemEnchantedBook(ClassNode classNode) {
         String
         addInformationMethodName = ECCorePlugin.isObfuscated() ? "a" : "addInformation",
-                getAllMethodName = ECCorePlugin.isObfuscated() ? "a" : "getAll",
-                        itemStackClassName = ECCorePlugin.isObfuscated() ? "afj" : "net/minecraft/item/ItemStack",
-                                entityPlayerClassName = ECCorePlugin.isObfuscated() ? "aay" : "net/minecraft/entity/player/EntityPlayer",
-                                        enchantmentClassName = ECCorePlugin.isObfuscated() ? "aii" : "net/minecraft/enchantment/Enchantment",
-                                                listClassName = "java/util/List";
+                getSubItemsMethodName = ECCorePlugin.isObfuscated() ? "a" : "getSubItems",
+                        creativeTabsClassName = ECCorePlugin.isObfuscated() ? "ahp" : "net/minecraft/creativetab/CreativeTabs",
+                                nonNullListClassName = ECCorePlugin.isObfuscated() ? "fi" : "net/minecraft/util/NonNullList",
+                                        itemStackClassName = ECCorePlugin.isObfuscated() ? "aip" : "net/minecraft/item/ItemStack",
+                                                worldClassName = ECCorePlugin.isObfuscated() ? "amu" : "net/minecraft/world/World",
+                                                        iTooltipFlagClassName = ECCorePlugin.isObfuscated() ? "akb" : "net/minecraft/client/util/ITooltipFlag",
+                                                                listClassName = "java/util/List";
         boolean 
         isSuccessful0 = false,
         isSuccessful1 = false;   
         AbstractInsnNode currentInsn;
 
         for (MethodNode methodNode : classNode.methods) {    
-            if (methodNode.name.equals(addInformationMethodName) && methodNode.desc.equals("(L" + itemStackClassName + ";L" + entityPlayerClassName + ";L" + listClassName + ";Z)V")) {                         
+            if (methodNode.name.equals(addInformationMethodName) && methodNode.desc.equals("(L" + itemStackClassName + ";L" + worldClassName + ";L" + listClassName + ";L" + iTooltipFlagClassName + ";)V")) {                         
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
                 while (insnIterator.hasNext()) {                        
                     currentInsn = insnIterator.next();                  
@@ -321,7 +328,7 @@ public enum EnumInputClasses {
                     }
                 }    
             }
-            if (methodNode.name.equals(getAllMethodName) && methodNode.desc.equals("(L" + enchantmentClassName + ";L" + listClassName + ";)V")) {                         
+            if (methodNode.name.equals(getSubItemsMethodName) && methodNode.desc.equals("(L" + creativeTabsClassName + ";L" + nonNullListClassName + ";)V")) {                         
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
                 while (insnIterator.hasNext()) {                        
                     currentInsn = insnIterator.next();                  
@@ -329,7 +336,7 @@ public enum EnumInputClasses {
                         InsnList nodesList = new InsnList();   
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 1));
                         nodesList.add(new VarInsnNode(Opcodes.ALOAD, 2));
-                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getAll", "(L" + enchantmentClassName + ";L" + listClassName + ";)V", false));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getSubItems", "(L" + creativeTabsClassName + ";L" + nonNullListClassName + ";)V", false));
                         nodesList.add(new InsnNode(Opcodes.RETURN));
                         methodNode.instructions.insertBefore(currentInsn, nodesList); 
                         isSuccessful1 = true;                        
@@ -342,44 +349,11 @@ public enum EnumInputClasses {
         return isSuccessful0 && isSuccessful1;    
     }
 
-    private boolean pathcMCCreativeTabs(ClassNode classNode) {
-        String
-        addEnchantmentBooksToListMethodName = ECCorePlugin.isObfuscated() ? "a" : "addEnchantmentBooksToList",
-                enchantmentClassName = ECCorePlugin.isObfuscated() ? "aii" : "net/minecraft/enchantment/Enchantment",
-                        enumEnchantmentTypeClassName = ECCorePlugin.isObfuscated() ? "aij" : "net/minecraft/enchantment/EnumEnchantmentType",
-                                listClassName = "java/util/List";
-        boolean isSuccessful = false;   
-        int invokevirtualCount = 0;
-        AbstractInsnNode currentInsn;
-
-        for (MethodNode methodNode : classNode.methods) {    
-            if (methodNode.name.equals(addEnchantmentBooksToListMethodName) && methodNode.desc.equals("(L" + listClassName + ";[L" + enumEnchantmentTypeClassName + ";)V")) {                         
-                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
-                while (insnIterator.hasNext()) {                        
-                    currentInsn = insnIterator.next();                  
-                    if (currentInsn.getOpcode() == Opcodes.INVOKEVIRTUAL) { 
-                        invokevirtualCount++;
-                        if (invokevirtualCount == 2) {
-                            InsnList nodesList = new InsnList();   
-                            nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "getMaxLevel", "(L" + enchantmentClassName + ";)I", false));
-                            methodNode.instructions.insert(currentInsn, nodesList); 
-                            methodNode.instructions.remove(currentInsn);
-                            isSuccessful = true;                        
-                            break;
-                        }
-                    }
-                }    
-                break;
-            }
-        }
-        return isSuccessful;    
-    }
-
     private boolean pathcMCContainerRepair(ClassNode classNode) {
         String
         updateRepairOutputMethodName = ECCorePlugin.isObfuscated() ? "e" : "updateRepairOutput",
-                enchantmentClassName = ECCorePlugin.isObfuscated() ? "aii" : "net/minecraft/enchantment/Enchantment",
-                        itemStackClassName = ECCorePlugin.isObfuscated() ? "afj" : "net/minecraft/item/ItemStack";
+                enchantmentClassName = ECCorePlugin.isObfuscated() ? "alk" : "net/minecraft/enchantment/Enchantment",
+                        itemStackClassName = ECCorePlugin.isObfuscated() ? "aip" : "net/minecraft/item/ItemStack";
         boolean 
         isSuccessful0 = false,
         isSuccessful1 = false,  
@@ -388,7 +362,6 @@ public enum EnumInputClasses {
         int 
         istoreCount = 0,
         ifneCount = 0,
-        ificmpleCount = 0,
         invokestaticCount = 0;
         AbstractInsnNode currentInsn;
 
@@ -410,7 +383,7 @@ public enum EnumInputClasses {
                         }
                     } else if (currentInsn.getOpcode() == Opcodes.IFNE) {
                         ifneCount++;
-                        if (ifneCount == 10) {
+                        if (ifneCount == 8) {
                             InsnList nodesList = new InsnList();   
                             nodesList.add(new VarInsnNode(Opcodes.ALOAD, 18));//TODO Need debug. Swapped, because in vanilla it checks enchantment settings on second item - may be mistake. 
                             nodesList.add(new VarInsnNode(Opcodes.ALOAD, 13));
@@ -422,17 +395,14 @@ public enum EnumInputClasses {
                             isSuccessful1 = true;
                         }
                     } else if (currentInsn.getOpcode() == Opcodes.IF_ICMPLE) {
-                        ificmpleCount++;
-                        if (ificmpleCount == 2) {
-                            InsnList nodesList = new InsnList();   
-                            nodesList.add(new InsnNode(Opcodes.ICONST_0));
-                            nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
-                            methodNode.instructions.insertBefore(currentInsn.getPrevious().getPrevious().getPrevious(), nodesList); 
-                            isSuccessful2 = true;
-                        }
+                        InsnList nodesList = new InsnList();   
+                        nodesList.add(new InsnNode(Opcodes.ICONST_0));
+                        nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
+                        methodNode.instructions.insertBefore(currentInsn.getPrevious().getPrevious().getPrevious(), nodesList); 
+                        isSuccessful2 = true;
                     } else if (currentInsn.getOpcode() == Opcodes.INVOKESTATIC) {
                         invokestaticCount++;
-                        if (invokestaticCount == 7) {
+                        if (invokestaticCount == 8) {
                             InsnList nodesList = new InsnList();   
                             nodesList.add(new VarInsnNode(Opcodes.ALOAD, 13));
                             nodesList.add(new VarInsnNode(Opcodes.ILOAD, 15));
@@ -450,18 +420,50 @@ public enum EnumInputClasses {
         return isSuccessful0 && isSuccessful1 && isSuccessful2 && isSuccessful3;    
     }
 
+    private boolean pathcTEEnchanterManager(ClassNode classNode) {
+        String
+        addDefaultEnchantmentRecipeMethodName = "addDefaultEnchantmentRecipe",
+        enchantmentClassName = "net/minecraft/enchantment/Enchantment";
+        boolean isSuccessful = false;   
+        AbstractInsnNode currentInsn;
+
+        for (MethodNode methodNode : classNode.methods) {               
+            if (methodNode.name.equals(addDefaultEnchantmentRecipeMethodName)) {                         
+                Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
+                while (insnIterator.hasNext()) {                        
+                    currentInsn = insnIterator.next();                  
+                    if (currentInsn.getOpcode() == Opcodes.IFNONNULL) {    
+                        InsnList nodesList = new InsnList();   
+                        nodesList.add(new VarInsnNode(Opcodes.ALOAD, 3));
+                        nodesList.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS_CLASS, "isInvalid", "(L" + enchantmentClassName + ";)Z", false));
+                        nodesList.add(new JumpInsnNode(Opcodes.IFEQ, ((JumpInsnNode) currentInsn).label));
+                        methodNode.instructions.insert(currentInsn, nodesList); 
+                        methodNode.instructions.remove(currentInsn.getPrevious());
+                        methodNode.instructions.remove(currentInsn);
+                        isSuccessful = true;                        
+                        break;
+                    }
+                }    
+                break;
+            }
+        }
+        return isSuccessful;
+    }
+    
+    //TODO
     private boolean pathcMCItemStack(ClassNode classNode) {
         String
         getTooltipMethodName = ECCorePlugin.isObfuscated() ? "a" : "getTooltip",
-                itemStackClassName = ECCorePlugin.isObfuscated() ? "afj" : "net/minecraft/item/ItemStack",
-                        entityPlayerClassName = ECCorePlugin.isObfuscated() ? "aay" : "net/minecraft/entity/player/EntityPlayer",
-                                listClassName = "java/util/List"; 
+                itemStackClassName = ECCorePlugin.isObfuscated() ? "aip" : "net/minecraft/item/ItemStack",
+                        entityPlayerClassName = ECCorePlugin.isObfuscated() ? "aed" : "net/minecraft/entity/player/EntityPlayer",
+                                iTooltipFlagClassName = ECCorePlugin.isObfuscated() ? "akb" : "net/minecraft/client/util/ITooltipFlag",
+                                        listClassName = "java/util/List"; 
         boolean isSuccessful = false;   
         int ifneCount = 0;
         AbstractInsnNode currentInsn;
 
         for (MethodNode methodNode : classNode.methods) {               
-            if (methodNode.name.equals(getTooltipMethodName) && methodNode.desc.equals("(L" + entityPlayerClassName + ";Z)L" + listClassName + ";")) {                         
+            if (methodNode.name.equals(getTooltipMethodName) && methodNode.desc.equals("(L" + entityPlayerClassName + ";L" + iTooltipFlagClassName + ";)L" + listClassName + ";")) {                         
                 Iterator<AbstractInsnNode> insnIterator = methodNode.instructions.iterator();              
                 while (insnIterator.hasNext()) {                        
                     currentInsn = insnIterator.next();                  

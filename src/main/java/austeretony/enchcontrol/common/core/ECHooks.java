@@ -22,14 +22,17 @@ import net.minecraft.command.CommandEnchant;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.village.MerchantRecipe;
@@ -72,7 +75,7 @@ public class ECHooks {
     public static void removeIncompatible(List<EnchantmentData> list, EnchantmentData enchantmentData) {
         Iterator<EnchantmentData> iterator = list.iterator();
         while (iterator.hasNext()) {
-            if (!EnchantmentWrapper.get(enchantmentData.enchantmentobj).isCompatibleWith((iterator.next()).enchantmentobj))
+            if (!EnchantmentWrapper.get(enchantmentData.enchantment).isCompatibleWith((iterator.next()).enchantment))
                 iterator.remove();
         }
     }
@@ -118,13 +121,13 @@ public class ECHooks {
         int 
         levelCap = MathHelper.clamp(wrapper.getMaxLevel(), wrapper.getMinLevel(), EnumConfigSettings.MERCHANT_DEALS_LEVEL_CAP.getIntValue()),
         i = MathHelper.getInt(random, wrapper.getMinLevel(), levelCap);
-        ItemStack itemStack = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, i));
+        ItemStack itemstack = ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment, i));
         int j = 2 + random.nextInt(5 + i * 10) + 3 * i;
         if (wrapper.shouldDoublePrice())
             j *= 2;
         if (j > 64)
             j = 64;
-        recipeList.add(new MerchantRecipe(new ItemStack(Items.BOOK), new ItemStack(Items.EMERALD, j), itemStack));
+        recipeList.add(new MerchantRecipe(new ItemStack(Items.BOOK), new ItemStack(Items.EMERALD, j), itemstack));
     }
 
     //Hook to <EnchantRandomly> class to <apply()> method (replaces whole method).
@@ -153,7 +156,7 @@ public class ECHooks {
         i = MathHelper.getInt(rand, wrapper.getMinLevel(), levelCap);
         if (itemStack.getItem() == Items.BOOK) {
             itemStack = new ItemStack(Items.ENCHANTED_BOOK);
-            Items.ENCHANTED_BOOK.addEnchantment(itemStack, new EnchantmentData(enchantment, i));
+            ItemEnchantedBook.addEnchantment(itemStack, new EnchantmentData(enchantment, i));
         } else {
             itemStack.addEnchantment(enchantment, i);
         }
@@ -191,24 +194,36 @@ public class ECHooks {
         }
     }
 
-    //TODO
-    //Hook to <ItemEnchantedBook> class to <getAll()> method (replaces whole method).
-    public static void getAll(Enchantment enchantment, List<ItemStack> items) {
-        EnchantmentWrapper wrapper = EnchantmentWrapper.get(enchantment);
-        int levelCap = MathHelper.clamp(wrapper.getMaxLevel(), wrapper.getMinLevel(), EnumConfigSettings.CREATIVE_TAB_LEVEL_CAP.getIntValue());
-        for (int i = wrapper.getMinLevel(); i <= levelCap; ++i)
-            items.add(Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, i)));
+    //Hook to <ItemEnchantedBook> class to <getSubItems()> method (replaces whole method).
+    public static void getSubItems(CreativeTabs tab, NonNullList<ItemStack> items) {
+        if (tab == CreativeTabs.SEARCH) {
+            EnchantmentWrapper wrapper;
+            int levelCap;
+            for (Enchantment enchantment : Enchantment.REGISTRY) {
+                wrapper = EnchantmentWrapper.get(enchantment);
+                levelCap = MathHelper.clamp(wrapper.getMaxLevel(), wrapper.getMinLevel(), EnumConfigSettings.CREATIVE_TAB_LEVEL_CAP.getIntValue());
+                if (enchantment.type != null)
+                    for (int i = wrapper.getMinLevel(); i <= levelCap; ++i)
+                        items.add(ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment, i)));
+            }
+        } else if (tab.getRelevantEnchantmentTypes().length != 0) {
+            for (Enchantment enchantment1 : Enchantment.REGISTRY)
+                if (tab.hasRelevantEnchantmentType(enchantment1.type))
+                    items.add(ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment1, EnchantmentWrapper.get(enchantment1).getMaxLevel())));
+        }
     }
 
-    //Hook to <CreativeTabs> class to <addEnchantmentBooksToList()> method (replaces max level getter).
-    public static int getMaxLevel(Enchantment enchantment) {
-        return EnchantmentWrapper.get(enchantment).getMaxLevel();
+    //Hook to <EnchanterManager> class to <addDefaultEnchantmentRecipe()> method (validate enchantment).
+    public static boolean isInvalid(Enchantment enchantment) {
+        if (enchantment == null)
+            return true;
+        return !EnchantmentWrapper.get(enchantment).isEnabled();
     }
 
     //Hook to <ItemStack> class to <getTooltip()> method (replaces enchantment tooltip).
     public static void modifyItemStackTooltip(int flag, ItemStack itemStack, List<String> tooltip, boolean enchantedBook) {
         if ((flag & 1) == 0 || enchantedBook) {
-            NBTTagList tagList = enchantedBook ? Items.ENCHANTED_BOOK.getEnchantments(itemStack) : itemStack.getEnchantmentTagList();
+            NBTTagList tagList = enchantedBook ? ItemEnchantedBook.getEnchantments(itemStack) : itemStack.getEnchantmentTagList();
             int k, l;
             Enchantment enchantment;
             EnchantmentWrapper wrapper;

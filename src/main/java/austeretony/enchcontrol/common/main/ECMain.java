@@ -35,7 +35,7 @@ public class ECMain {
     NAME = "Enchantments Control", 
     VERSION = "1.1.4", 
     VERSION_CUSTOM = VERSION + ":beta:0",
-    GAME_VERSION = "1.11.2",
+    GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_forge.json",
     VERSIONS_CUSTOM_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_custom.json",
     PROJECT_LOCATION = "minecraft.curseforge.com",

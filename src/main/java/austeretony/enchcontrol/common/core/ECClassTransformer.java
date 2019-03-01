@@ -29,12 +29,14 @@ public class ECClassTransformer implements IClassTransformer {
             return patch(basicClass, EnumInputClasses.MC_COMMAND_ENCHANT);
         case "net.minecraft.item.ItemEnchantedBook":
             return patch(basicClass, EnumInputClasses.MC_ITEM_ENCHANTED_BOOK);
-        case "net.minecraft.creativetab.CreativeTabs":
-            return patch(basicClass, EnumInputClasses.MC_CREATIVE_TABS);
         case "net.minecraft.inventory.ContainerRepair":
             return patch(basicClass, EnumInputClasses.MC_CONTAINER_REPAIR);
         case "net.minecraft.item.ItemStack":
             return patch(basicClass, EnumInputClasses.MC_ITEM_STACK);
+
+            //Support for Thermal Expansion Arcane Ensorcellator (tested for 5.5.3.41)
+        case "cofh.thermalexpansion.util.managers.machine.EnchanterManager":
+            return patch(basicClass, EnumInputClasses.TE_ENCHANTER_MANAGER);
         }
         return basicClass;
     }
