@@ -1,4 +1,4 @@
-Enchantment Descriptions
+Enchantment Descriptions (1.11.2, 1.12.2)
 ========================
 1. Enchantments Control can use descriptions provided for Enchantment Descriptions Mod.
  - Enchantments Control will use enchantment description from any mod, which provides 
@@ -7,7 +7,7 @@ Enchantment Descriptions
  - If Enchantments Control config contains descriptions for some enchantments it will be used by 
  Enchantment Descriptions Mod (only if there is no description, provided for Enchantment Descriptions Mod). 
  
-Thermal Expansion
+Thermal Expansion (1.12.2)
 =================
 1. Support for Arcane Ensorcellator mechanism:
  - recipes which uses disabled enchantments will be unavailable.
