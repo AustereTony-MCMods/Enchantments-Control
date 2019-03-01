@@ -8,7 +8,7 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.Name;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin.TransformerExclusions;
 
 @Name("Enchantments Control Core")
-@MCVersion("1.12.2")
+@MCVersion("1.11.2")
 @TransformerExclusions({"austeretony.enchcontrol.common.core"})
 public class ECCorePlugin implements IFMLLoadingPlugin {
 

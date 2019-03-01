@@ -356,7 +356,7 @@ public class EnchantmentWrapper {
 
     public boolean isCompatibleWith(Enchantment enchantment) {
         return this.incompatMode == 0 ? 
-                this.wrapped.isCompatibleWith(enchantment) && !this.isEnchantmentExist(enchantment.getRegistryName()) 
+                this.wrapped.func_191560_c(enchantment) && !this.isEnchantmentExist(enchantment.getRegistryName()) 
                 : !this.isEnchantmentExist(enchantment.getRegistryName());
     }
 
