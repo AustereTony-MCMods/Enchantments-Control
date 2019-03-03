@@ -1,5 +1,8 @@
 {
   "homepage": "https://minecraft.curseforge.com/projects/enchantments-control",
+  "1.9.4": {
+    "1.1.4": "Improvements for descriptions and tooltips. Config from previous versions incompatible with new version."
+  },
   "1.10.2": {
     "1.1.4": "Improvements for descriptions and tooltips. Config from previous versions incompatible with new version."
   },
@@ -10,6 +13,8 @@
     "1.1.4": "Improvements for descriptions and tooltips. Config from previous versions incompatible with new version."
   },
   "promos": {
+    "1.9.4-latest": "1.1.4",
+    "1.9.4-recommended": "1.1.4",
     "1.10.2-latest": "1.1.4",
     "1.10.2-recommended": "1.1.4",
     "1.11.2-latest": "1.1.4",
