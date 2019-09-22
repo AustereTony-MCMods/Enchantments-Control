@@ -1,3 +1,7 @@
+1.1.5b [2019-09-22]
++Fixed server crash caused by NoClassDefFoundException.
++Fixed client crash caused by enchanted item tooltip rendering in some circumstances.
+
 1.1.4b
 +Added ability to hide curses on items and books.
 +Added ability to hide any enchantmnet on items or books.
