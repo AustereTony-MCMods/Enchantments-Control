@@ -16,7 +16,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import austeretony.enchcontrol.common.config.EnumConfigSettings;
 
-public enum EnumInputClasses {
+public enum EnumInputClass {
 
     MC_LOCALE("Minecraft", "Locale", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
     MC_ENCHANTMENT("Minecraft", "Enchantment", 0, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES),
@@ -36,7 +36,7 @@ public enum EnumInputClasses {
 
     public final int readerFlags, writerFlags;
 
-    EnumInputClasses(String domain, String clazz, int readerFlags, int writerFlags) {
+    EnumInputClass(String domain, String clazz, int readerFlags, int writerFlags) {
         this.domain = domain;
         this.clazz = clazz;
         this.readerFlags = readerFlags;

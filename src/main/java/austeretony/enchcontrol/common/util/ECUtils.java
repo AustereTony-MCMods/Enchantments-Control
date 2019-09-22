@@ -19,7 +19,7 @@ import com.google.gson.JsonParser;
 
 public class ECUtils {
 
-    private final static TreeMap<Integer, String> ROMAN_NUMERALS = new TreeMap<Integer, String>();
+    private final static TreeMap<Integer, String> ROMAN_NUMERALS = new TreeMap<>();
 
     static {
         ROMAN_NUMERALS.put(1000, "M");
@@ -73,6 +73,10 @@ public class ECUtils {
     }
 
     public static String toRomanNumeral(int number) {
+        if (number == 0)
+            return "0";
+        if (number < 0)
+            return "-" + toRomanNumeral(number * - 1);
         int l = ROMAN_NUMERALS.floorKey(number);
         if (number == l)
             return ROMAN_NUMERALS.get(number);

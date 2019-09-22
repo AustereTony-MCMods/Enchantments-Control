@@ -6,7 +6,7 @@ import java.util.TreeSet;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
-import austeretony.enchcontrol.common.command.EnumCommandECArgs;
+import austeretony.enchcontrol.common.command.EnumCommandArg;
 import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
 import austeretony.enchcontrol.common.reference.CommonReference;
 import net.minecraft.enchantment.Enchantment;
@@ -19,7 +19,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.ClickEvent;
 
-public enum EnumChatMessages {
+public enum EnumChatMessage {
 
     UPDATE_MESSAGE,
     COMMAND_EC_HELP,
@@ -78,8 +78,8 @@ public enum EnumChatMessages {
             break;
         case COMMAND_EC_HELP:
             CommonReference.sendMessage(player, prefix().appendSibling(new TextComponentTranslation("ec.command.help.title")));
-            for (EnumCommandECArgs arg : EnumCommandECArgs.values()) {
-                if (arg != EnumCommandECArgs.HELP) {
+            for (EnumCommandArg arg : EnumCommandArg.values()) {
+                if (arg != EnumCommandArg.HELP) {
                     msg1 = new TextComponentString("/ec " + arg);
                     msg2 = new TextComponentString(" - ");
                     msg1.getStyle().setColor(TextFormatting.GREEN);  

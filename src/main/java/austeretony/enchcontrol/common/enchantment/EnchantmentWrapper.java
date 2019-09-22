@@ -20,9 +20,9 @@ import net.minecraft.util.math.MathHelper;
 
 public class EnchantmentWrapper {
 
-    private static final Map<ResourceLocation, EnchantmentWrapper> WRAPPERS = new HashMap<ResourceLocation, EnchantmentWrapper>();
+    private static final Map<ResourceLocation, EnchantmentWrapper> WRAPPERS = new HashMap<>();
 
-    public static final Set<EnchantmentWrapper> UNKNOWN = new HashSet<EnchantmentWrapper>();
+    public static final Set<EnchantmentWrapper> UNKNOWN = new HashSet<>();
 
     public final ResourceLocation registryName;
 

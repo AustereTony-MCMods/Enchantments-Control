@@ -1,6 +1,6 @@
 package austeretony.enchcontrol.common.command;
 
-public enum EnumCommandECArgs {
+public enum EnumCommandArg {
 
     HELP("help"),
     LIST_ALL("list-all", 1),
@@ -18,7 +18,7 @@ public enum EnumCommandECArgs {
 
     private final int argsAmount;
 
-    EnumCommandECArgs(String arg, int... argsAmount) {
+    EnumCommandArg(String arg, int... argsAmount) {
         this.argsAmount = argsAmount.length > 0 ? argsAmount[0] : 0;
         this.arg = arg;
     }
@@ -31,10 +31,10 @@ public enum EnumCommandECArgs {
         return commandArgs[this.getArgsAmount() - 1];
     }
 
-    public static EnumCommandECArgs get(String... commandArgs) {
+    public static EnumCommandArg get(String... commandArgs) {
         if (commandArgs.length == 0)
             return null;
-        for (EnumCommandECArgs arg : values())
+        for (EnumCommandArg arg : values())
             if (arg.arg.equals(commandArgs[0]) && commandArgs.length == arg.getArgsAmount())
                 return arg;
         return null;

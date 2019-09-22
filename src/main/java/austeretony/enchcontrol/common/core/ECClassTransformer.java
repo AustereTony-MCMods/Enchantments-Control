@@ -10,38 +10,38 @@ import net.minecraft.launchwrapper.IClassTransformer;
 
 public class ECClassTransformer implements IClassTransformer {
 
-    public static final Logger CORE_LOGGER = LogManager.getLogger("Enchantments Control Core");
+    public static final Logger CORE_LOGGER = LogManager.getLogger("EC Core Plugin");
 
     @Override
     public byte[] transform(String name, String transformedName, byte[] basicClass) {
         switch (transformedName) {
         case "net.minecraft.client.resources.Locale":                    
-            return patch(basicClass, EnumInputClasses.MC_LOCALE);
+            return patch(basicClass, EnumInputClass.MC_LOCALE);
         case "net.minecraft.enchantment.Enchantment":
-            return patch(basicClass, EnumInputClasses.MC_ENCHANTMENT);
+            return patch(basicClass, EnumInputClass.MC_ENCHANTMENT);
         case "net.minecraft.enchantment.EnchantmentHelper":
-            return patch(basicClass, EnumInputClasses.MC_ENCHANTMENT_HELPER);
+            return patch(basicClass, EnumInputClass.MC_ENCHANTMENT_HELPER);
         case "net.minecraft.entity.passive.EntityVillager$ListEnchantedBookForEmeralds":
-            return patch(basicClass, EnumInputClasses.MC_LIST_ENCHANTED_BOOK_FOR_EMERALDS);
+            return patch(basicClass, EnumInputClass.MC_LIST_ENCHANTED_BOOK_FOR_EMERALDS);
         case "net.minecraft.world.storage.loot.functions.EnchantRandomly":
-            return patch(basicClass, EnumInputClasses.MC_ENCHANT_RANDOMLY);
+            return patch(basicClass, EnumInputClass.MC_ENCHANT_RANDOMLY);
         case "net.minecraft.command.CommandEnchant":
-            return patch(basicClass, EnumInputClasses.MC_COMMAND_ENCHANT);
+            return patch(basicClass, EnumInputClass.MC_COMMAND_ENCHANT);
         case "net.minecraft.item.ItemEnchantedBook":
-            return patch(basicClass, EnumInputClasses.MC_ITEM_ENCHANTED_BOOK);
+            return patch(basicClass, EnumInputClass.MC_ITEM_ENCHANTED_BOOK);
         case "net.minecraft.inventory.ContainerRepair":
-            return patch(basicClass, EnumInputClasses.MC_CONTAINER_REPAIR);
+            return patch(basicClass, EnumInputClass.MC_CONTAINER_REPAIR);
         case "net.minecraft.item.ItemStack":
-            return patch(basicClass, EnumInputClasses.MC_ITEM_STACK);
+            return patch(basicClass, EnumInputClass.MC_ITEM_STACK);
 
             //Support for Thermal Expansion Arcane Ensorcellator (tested for 5.5.3.41)
         case "cofh.thermalexpansion.util.managers.machine.EnchanterManager":
-            return patch(basicClass, EnumInputClasses.TE_ENCHANTER_MANAGER);
+            return patch(basicClass, EnumInputClass.TE_ENCHANTER_MANAGER);
         }
         return basicClass;
     }
 
-    private byte[] patch(byte[] basicClass, EnumInputClasses enumInput) {
+    private byte[] patch(byte[] basicClass, EnumInputClass enumInput) {
         ClassNode classNode = new ClassNode();
         ClassReader classReader = new ClassReader(basicClass);
         classReader.accept(classNode, enumInput.readerFlags);

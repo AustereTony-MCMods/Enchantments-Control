@@ -31,7 +31,6 @@ import com.google.gson.JsonPrimitive;
 
 import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
 import austeretony.enchcontrol.common.main.ECMain;
-import austeretony.enchcontrol.common.main.UpdateChecker;
 import austeretony.enchcontrol.common.reference.CommonReference;
 import austeretony.enchcontrol.common.util.ECUtils;
 import net.minecraft.client.resources.I18n;
@@ -100,7 +99,7 @@ public class ConfigLoader {
             JsonObject externalConfigOld, externalConfigNew, externalGroupNew;
             externalConfigOld = ECUtils.getExternalJsonData(EXT_CONFIGURATION_FILE).getAsJsonObject();   
             JsonElement versionElement = externalConfigOld.get("version");
-            if (versionElement == null || UpdateChecker.isOutdated(versionElement.getAsString(), ECMain.VERSION_CUSTOM)) {
+            if (versionElement == null || isOutdated(versionElement.getAsString(), ECMain.VERSION_CUSTOM)) {
                 ECMain.LOGGER.info("Updating external config file...");
                 externalConfigNew = new JsonObject();
                 externalConfigNew.add("version", new JsonPrimitive(ECMain.VERSION_CUSTOM));
@@ -166,35 +165,35 @@ public class ConfigLoader {
         for (JsonElement enchElement : settingsFile) {
             enchObject = enchElement.getAsJsonObject();
             wrapper = EnchantmentWrapper.create(
-                    new ResourceLocation(enchObject.get(EnumEnchantmentsKeys.ID.key).getAsString()), 
-                    enchObject.get(EnumEnchantmentsKeys.ENABLED.key).getAsBoolean(),
-                    enchObject.get(EnumEnchantmentsKeys.UNLOCALIZED_NAME.key).getAsString(),
-                    enchObject.get(EnumEnchantmentsKeys.MIN_LEVEL.key).getAsInt(),
-                    enchObject.get(EnumEnchantmentsKeys.MAX_LEVEL.key).getAsInt());
-            wrapper.setHideOnItem(enchObject.get(EnumEnchantmentsKeys.HIDE_ON_ITEM.key).getAsBoolean());
-            wrapper.setHideOnBook(enchObject.get(EnumEnchantmentsKeys.HIDE_ON_BOOK.key).getAsBoolean());
-            slotsArray = enchObject.get(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key).getAsJsonArray();
+                    new ResourceLocation(enchObject.get(EnumEnchantmentsKey.ID.key).getAsString()), 
+                    enchObject.get(EnumEnchantmentsKey.ENABLED.key).getAsBoolean(),
+                    enchObject.get(EnumEnchantmentsKey.UNLOCALIZED_NAME.key).getAsString(),
+                    enchObject.get(EnumEnchantmentsKey.MIN_LEVEL.key).getAsInt(),
+                    enchObject.get(EnumEnchantmentsKey.MAX_LEVEL.key).getAsInt());
+            wrapper.setHideOnItem(enchObject.get(EnumEnchantmentsKey.HIDE_ON_ITEM.key).getAsBoolean());
+            wrapper.setHideOnBook(enchObject.get(EnumEnchantmentsKey.HIDE_ON_BOOK.key).getAsBoolean());
+            slotsArray = enchObject.get(EnumEnchantmentsKey.EQUIPMENT_SLOTS.key).getAsJsonArray();
             wrapper.initEnumEquipmentSlotsStrings(slotsArray.size());
             i = 0;
             for (JsonElement e : slotsArray)
                 wrapper.getEnumEquipmentSlotsStrings()[i++] = e.getAsString();
-            wrapper.setEnumRarityString(enchObject.get(EnumEnchantmentsKeys.RARITY.key).getAsString());
-            wrapper.setEnumTypeString(enchObject.get(EnumEnchantmentsKeys.TYPE.key).getAsString());
-            wrapper.setTreasure(enchObject.get(EnumEnchantmentsKeys.TREASURE.key).getAsBoolean());
-            wrapper.setDoublePrice(enchObject.get(EnumEnchantmentsKeys.DOUBLE_PRICE.key).getAsBoolean());
-            wrapper.setCurse(enchObject.get(EnumEnchantmentsKeys.CURSE.key).getAsBoolean());
-            wrapper.setAllowedOnBooks(enchObject.get(EnumEnchantmentsKeys.ALLOWED_ON_BOOKS.key).getAsBoolean());
-            wrapper.setCustomEvals(enchObject.get(EnumEnchantmentsKeys.CUSTOM_EVALUATIONS.key).getAsBoolean());
-            wrapper.setMinEnchantabilityEvaluation(enchObject.get(EnumEnchantmentsKeys.MIN_ENCH_EVAL.key).getAsString());
-            wrapper.setMaxEnchantabilityEvaluation(enchObject.get(EnumEnchantmentsKeys.MAX_ENCH_EVAL.key).getAsString());
-            wrapper.setIncompatMode(enchObject.get(EnumEnchantmentsKeys.INCOMPAT_MODE.key).getAsInt());
-            for (JsonElement incompatElement : enchObject.get(EnumEnchantmentsKeys.INCOMPATIBLE_ENCHANTMENTS.key).getAsJsonArray())
+            wrapper.setEnumRarityString(enchObject.get(EnumEnchantmentsKey.RARITY.key).getAsString());
+            wrapper.setEnumTypeString(enchObject.get(EnumEnchantmentsKey.TYPE.key).getAsString());
+            wrapper.setTreasure(enchObject.get(EnumEnchantmentsKey.TREASURE.key).getAsBoolean());
+            wrapper.setDoublePrice(enchObject.get(EnumEnchantmentsKey.DOUBLE_PRICE.key).getAsBoolean());
+            wrapper.setCurse(enchObject.get(EnumEnchantmentsKey.CURSE.key).getAsBoolean());
+            wrapper.setAllowedOnBooks(enchObject.get(EnumEnchantmentsKey.ALLOWED_ON_BOOKS.key).getAsBoolean());
+            wrapper.setCustomEvals(enchObject.get(EnumEnchantmentsKey.CUSTOM_EVALUATIONS.key).getAsBoolean());
+            wrapper.setMinEnchantabilityEvaluation(enchObject.get(EnumEnchantmentsKey.MIN_ENCH_EVAL.key).getAsString());
+            wrapper.setMaxEnchantabilityEvaluation(enchObject.get(EnumEnchantmentsKey.MAX_ENCH_EVAL.key).getAsString());
+            wrapper.setIncompatMode(enchObject.get(EnumEnchantmentsKey.INCOMPAT_MODE.key).getAsInt());
+            for (JsonElement incompatElement : enchObject.get(EnumEnchantmentsKey.INCOMPATIBLE_ENCHANTMENTS.key).getAsJsonArray())
                 wrapper.addIncompatibleEnchantment(new ResourceLocation(incompatElement.getAsString()));
-            wrapper.setApplicabilityMode(enchObject.get(EnumEnchantmentsKeys.APPLICABILITY_MODE.key).getAsInt());
-            wrapper.setListMode(enchObject.get(EnumEnchantmentsKeys.ITEMS_LIST_MODE.key).getAsInt());
-            for (JsonElement incompatElement : enchObject.get(EnumEnchantmentsKeys.ITEMS_LIST.key).getAsJsonArray())
+            wrapper.setApplicabilityMode(enchObject.get(EnumEnchantmentsKey.APPLICABILITY_MODE.key).getAsInt());
+            wrapper.setListMode(enchObject.get(EnumEnchantmentsKey.ITEMS_LIST_MODE.key).getAsInt());
+            for (JsonElement incompatElement : enchObject.get(EnumEnchantmentsKey.ITEMS_LIST.key).getAsJsonArray())
                 wrapper.addItem(new ResourceLocation(incompatElement.getAsString()));
-            if ((descArray = enchObject.get(EnumEnchantmentsKeys.DESCRIPTION.key).getAsJsonArray()).size() > 0) {
+            if ((descArray = enchObject.get(EnumEnchantmentsKey.DESCRIPTION.key).getAsJsonArray()).size() > 0) {
                 wrapper.initDescription(descArray.size());
                 i = 0;
                 for (JsonElement lineElement : descArray)
@@ -299,40 +298,40 @@ public class ConfigLoader {
             incompatArray = new JsonArray();
             itemsArray = new JsonArray();
             descArray = new JsonArray();
-            enchObject.add(EnumEnchantmentsKeys.ID.key, new JsonPrimitive(wrapper.registryName.toString()));
-            enchObject.add(EnumEnchantmentsKeys.UNLOCALIZED_NAME.key, new JsonPrimitive(wrapper.getName()));
-            enchObject.add(EnumEnchantmentsKeys.ENABLED.key, new JsonPrimitive(wrapper.isEnabled()));
-            enchObject.add(EnumEnchantmentsKeys.HIDE_ON_ITEM.key, new JsonPrimitive(wrapper.shouldHideOnItem()));
-            enchObject.add(EnumEnchantmentsKeys.HIDE_ON_BOOK.key, new JsonPrimitive(wrapper.shouldHideOnBook()));
-            enchObject.add(EnumEnchantmentsKeys.RARITY.key, new JsonPrimitive(wrapper.getRarity().toString()));
-            enchObject.add(EnumEnchantmentsKeys.TREASURE.key, new JsonPrimitive(wrapper.isTreasure()));
-            enchObject.add(EnumEnchantmentsKeys.DOUBLE_PRICE.key, new JsonPrimitive(wrapper.shouldDoublePrice()));
-            enchObject.add(EnumEnchantmentsKeys.CURSE.key, new JsonPrimitive(wrapper.isCurse()));
-            enchObject.add(EnumEnchantmentsKeys.ALLOWED_ON_BOOKS.key, new JsonPrimitive(wrapper.isAllowedOnBooks()));
-            enchObject.add(EnumEnchantmentsKeys.MIN_LEVEL.key, new JsonPrimitive(wrapper.getMinLevel()));
-            enchObject.add(EnumEnchantmentsKeys.MAX_LEVEL.key, new JsonPrimitive(wrapper.getMaxLevel()));
-            enchObject.add(EnumEnchantmentsKeys.CUSTOM_EVALUATIONS.key, new JsonPrimitive(wrapper.useCustomEvals()));
-            enchObject.add(EnumEnchantmentsKeys.MIN_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMinEnchantabilityEval()));
-            enchObject.add(EnumEnchantmentsKeys.MAX_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMaxEnchantabilityEval()));
-            enchObject.add(EnumEnchantmentsKeys.TYPE.key, new JsonPrimitive(wrapper.getType() == null ? "NULL" : wrapper.getType().toString()));
+            enchObject.add(EnumEnchantmentsKey.ID.key, new JsonPrimitive(wrapper.registryName.toString()));
+            enchObject.add(EnumEnchantmentsKey.UNLOCALIZED_NAME.key, new JsonPrimitive(wrapper.getName()));
+            enchObject.add(EnumEnchantmentsKey.ENABLED.key, new JsonPrimitive(wrapper.isEnabled()));
+            enchObject.add(EnumEnchantmentsKey.HIDE_ON_ITEM.key, new JsonPrimitive(wrapper.shouldHideOnItem()));
+            enchObject.add(EnumEnchantmentsKey.HIDE_ON_BOOK.key, new JsonPrimitive(wrapper.shouldHideOnBook()));
+            enchObject.add(EnumEnchantmentsKey.RARITY.key, new JsonPrimitive(wrapper.getRarity().toString()));
+            enchObject.add(EnumEnchantmentsKey.TREASURE.key, new JsonPrimitive(wrapper.isTreasure()));
+            enchObject.add(EnumEnchantmentsKey.DOUBLE_PRICE.key, new JsonPrimitive(wrapper.shouldDoublePrice()));
+            enchObject.add(EnumEnchantmentsKey.CURSE.key, new JsonPrimitive(wrapper.isCurse()));
+            enchObject.add(EnumEnchantmentsKey.ALLOWED_ON_BOOKS.key, new JsonPrimitive(wrapper.isAllowedOnBooks()));
+            enchObject.add(EnumEnchantmentsKey.MIN_LEVEL.key, new JsonPrimitive(wrapper.getMinLevel()));
+            enchObject.add(EnumEnchantmentsKey.MAX_LEVEL.key, new JsonPrimitive(wrapper.getMaxLevel()));
+            enchObject.add(EnumEnchantmentsKey.CUSTOM_EVALUATIONS.key, new JsonPrimitive(wrapper.useCustomEvals()));
+            enchObject.add(EnumEnchantmentsKey.MIN_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMinEnchantabilityEval()));
+            enchObject.add(EnumEnchantmentsKey.MAX_ENCH_EVAL.key, new JsonPrimitive(wrapper.getMaxEnchantabilityEval()));
+            enchObject.add(EnumEnchantmentsKey.TYPE.key, new JsonPrimitive(wrapper.getType() == null ? "NULL" : wrapper.getType().toString()));
             for (EntityEquipmentSlot equipment : wrapper.getEquipmentSlots())
                 equipArray.add(new JsonPrimitive(equipment.toString()));
-            enchObject.add(EnumEnchantmentsKeys.EQUIPMENT_SLOTS.key, equipArray);
-            enchObject.add(EnumEnchantmentsKeys.INCOMPAT_MODE.key, new JsonPrimitive(wrapper.getIncompatMode()));
+            enchObject.add(EnumEnchantmentsKey.EQUIPMENT_SLOTS.key, equipArray);
+            enchObject.add(EnumEnchantmentsKey.INCOMPAT_MODE.key, new JsonPrimitive(wrapper.getIncompatMode()));
             if (wrapper.hasIncompatibleEnchantments()) 
                 for (ResourceLocation regName : wrapper.getIncompatibleEnchantments())
                     incompatArray.add(new JsonPrimitive(regName.toString()));        
-            enchObject.add(EnumEnchantmentsKeys.INCOMPATIBLE_ENCHANTMENTS.key, incompatArray);
-            enchObject.add(EnumEnchantmentsKeys.APPLICABILITY_MODE.key, new JsonPrimitive(wrapper.getApplicabilityMode()));
-            enchObject.add(EnumEnchantmentsKeys.ITEMS_LIST_MODE.key, new JsonPrimitive(wrapper.getListMode()));
+            enchObject.add(EnumEnchantmentsKey.INCOMPATIBLE_ENCHANTMENTS.key, incompatArray);
+            enchObject.add(EnumEnchantmentsKey.APPLICABILITY_MODE.key, new JsonPrimitive(wrapper.getApplicabilityMode()));
+            enchObject.add(EnumEnchantmentsKey.ITEMS_LIST_MODE.key, new JsonPrimitive(wrapper.getListMode()));
             if (wrapper.hasItemList()) 
                 for (ResourceLocation regName : wrapper.getItemList())
                     itemsArray.add(new JsonPrimitive(regName.toString()));
-            enchObject.add(EnumEnchantmentsKeys.ITEMS_LIST.key, itemsArray);
+            enchObject.add(EnumEnchantmentsKey.ITEMS_LIST.key, itemsArray);
             if (wrapper.hasDescription() && !wrapper.isTemporaryDescription())
                 for (String line : wrapper.getDescription())
                     descArray.add(new JsonPrimitive(line));
-            enchObject.add(EnumEnchantmentsKeys.DESCRIPTION.key, descArray);
+            enchObject.add(EnumEnchantmentsKey.DESCRIPTION.key, descArray);
             enchsArray.add(enchObject);
         }              
         try (Writer writer = new FileWriter(EXT_DATA_FILE)) {             
@@ -372,5 +371,45 @@ public class ConfigLoader {
         } catch (IOException exception) {
             exception.printStackTrace();
         }
+    }
+
+    public static boolean isOutdated(String currentVersion, String availableVersion) {        
+        try {
+            String[] 
+                    cSplitted = currentVersion.split("[:]"),
+                    aSplitted = availableVersion.split("[:]");    
+            String 
+            cVer = cSplitted[0],
+            cType = cSplitted[1],
+            cRev = cSplitted[2],
+            aVer = aSplitted[0],
+            aType = aSplitted[1],
+            aRev = aSplitted[2];
+            String[]
+                    cVerSplitted = cVer.split("[.]"),
+                    aVerSplitted = aVer.split("[.]");
+            int verDiff, revDiff;               
+            for (int i = 0; i < 3; i++) {                                                             
+                verDiff = Integer.parseInt(aVerSplitted[i]) - Integer.parseInt(cVerSplitted[i]);                                                                                           
+                if (verDiff > 0)
+                    return true;                                
+                if (verDiff < 0)
+                    return false;
+            }  
+            if (aType.equals("release") && (cType.equals("beta") || cType.equals("alpha")))
+                return true;
+            if (aType.equals("beta") && cType.equals("alpha"))
+                return true;
+            revDiff = Integer.parseInt(aRev) - Integer.parseInt(cRev);                                                                                           
+            if (revDiff > 0)
+                return true;                                
+            if (revDiff < 0)
+                return false;
+            return false;
+        } catch (Exception exception) { 
+            ECMain.LOGGER.error("Versions comparison failed!");               
+            exception.printStackTrace();
+        }
+        return true;
     }
 }

@@ -65,7 +65,7 @@ public class ECHooks {
     //Hook to <Enchantment> class to <getTranslatedName()> method (replaces whole method).
     public static String getTranslatedName(Enchantment enchantment, int level) {
         EnchantmentWrapper wrapper = EnchantmentWrapper.get(enchantment);
-        String s = I18n.format(wrapper.getName());
+        String s = net.minecraft.util.text.translation.I18n.translateToLocal(wrapper.getName());
         if (wrapper.isCurse())
             s = TextFormatting.RED + s;
         return level == 1 && wrapper.getMaxLevel() == 1 ? s : s + " " + (EnumConfigSettings.ROMAN_NUMERALS.isEnabled() ? ECUtils.toRomanNumeral(level) : level);
@@ -232,7 +232,6 @@ public class ECHooks {
                 k = nbttagcompound.getShort("id");
                 l = nbttagcompound.getShort("lvl");
                 enchantment = Enchantment.getEnchantmentByID(k);
-                wrapper = EnchantmentWrapper.get(enchantment);
                 if (enchantment != null) {
                     wrapper = EnchantmentWrapper.get(enchantment);
                     boolean curseMarked = false;

@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 import austeretony.enchcontrol.client.event.EnchantmentDescriptionRenderer;
 import austeretony.enchcontrol.common.command.CommandEC;
 import austeretony.enchcontrol.common.config.ConfigLoader;
-import austeretony.enchcontrol.common.config.EnumConfigSettings;
 import austeretony.enchcontrol.common.enchantment.EnchantmentWrapper;
 import austeretony.enchcontrol.common.reference.CommonReference;
 import net.minecraftforge.fml.common.Loader;
@@ -33,17 +32,16 @@ public class ECMain {
     public static final String 
     MODID = "enchcontrol", 
     NAME = "Enchantments Control", 
-    VERSION = "1.1.4", 
+    VERSION = "1.1.5", 
     VERSION_CUSTOM = VERSION + ":beta:0",
     GAME_VERSION = "1.12.2",
     VERSIONS_FORGE_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_forge.json",
-    VERSIONS_CUSTOM_URL = "https://raw.githubusercontent.com/AustereTony-MCMods/Enchantments-Control/info/mod_versions_custom.json",
     PROJECT_LOCATION = "minecraft.curseforge.com",
     PROJECT_URL = "https://minecraft.curseforge.com/projects/enchantments-control";
 
     public static final Logger LOGGER = LogManager.getLogger(NAME);
 
-    public static final Map<String, String> MODS_NAMES = new HashMap<String, String>();
+    public static final Map<String, String> MODS_NAMES = new HashMap<>();
 
     static {
         ConfigLoader.load();
@@ -51,8 +49,6 @@ public class ECMain {
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
-        if (EnumConfigSettings.CHECK_UPDATES.isEnabled())
-            CommonReference.registerEvent(new UpdateChecker());
         if (event.getSide() == Side.CLIENT) 
             CommonReference.registerEvent(new EnchantmentDescriptionRenderer());
     }
@@ -70,8 +66,6 @@ public class ECMain {
         if (event.getSide() == Side.SERVER)
             ConfigLoader.runningAtDedicatedServer = true;
         CommonReference.registerCommand(event, new CommandEC());
-        if (EnumConfigSettings.CHECK_UPDATES.isEnabled())
-            new Thread(new UpdateChecker(), "Enchantments Control Update Check").start();  
     }
 
     private void collectModNames() {

@@ -1,6 +1,6 @@
 package austeretony.enchcontrol.common.config;
 
-public enum EnumEnchantmentsKeys {
+public enum EnumEnchantmentsKey {
 
     ID("id"),
     ENABLED("enabled"),
@@ -28,7 +28,7 @@ public enum EnumEnchantmentsKeys {
 
     public final String key;
 
-    EnumEnchantmentsKeys(String key) {
+    EnumEnchantmentsKey(String key) {
         this.key = key;
     }
 }

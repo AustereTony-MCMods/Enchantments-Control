@@ -7,7 +7,6 @@ public enum EnumConfigSettings {
 
     EXTERNAL_CONFIG(0, "main", "external_config", true),
     DEBUG_MODE(0, "main", "debug_mode"),
-    CHECK_UPDATES(0, "main", "custom_update_checker"),
     CUSTOM_LOCALIZATION(0, "main", "custom_localization"),
     HIDE_CURSES(0, "tweaks", "hide_curses"),
     NOTIFY_CURSED(0, "tweaks", "notify_cursed"),
